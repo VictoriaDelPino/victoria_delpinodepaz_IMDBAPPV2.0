@@ -51,16 +51,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializa la base de datos local
         DBManager.init(this);
+
+        // Obtiene la instancia de Firebase Auth y el usuario actual
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+
         //Comprobacion de que el usuario tiene los datos en firestore
-        FirestoreManager.createUser();
+        if (currentUser != null) {
+            FirestoreManager.createUser();
+        } else {
+            Log.w("FirebaseAuth", "El usuario no ha iniciado sesión.");
+        }
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.appBarMain.toolbar);
 
-        // Obtiene la instancia de Firebase Auth y el usuario actual
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+
 
         if (currentUser != null) {
             // Usuario autenticado

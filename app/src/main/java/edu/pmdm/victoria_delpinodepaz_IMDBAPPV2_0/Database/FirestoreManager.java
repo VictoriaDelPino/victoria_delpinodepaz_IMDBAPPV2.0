@@ -11,8 +11,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FirestoreManager {
+
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     private static FirebaseFirestore getInstace(){
         FirebaseFirestore dbFirestore= FirebaseFirestore.getInstance();
@@ -21,6 +25,7 @@ public class FirestoreManager {
 
     public static void createUser(){
         CountDownLatch countDownLatchFirebase= new CountDownLatch(1);
+        executorService.execute(() -> {
         //implementar tambien un ejecutor
         String email=FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseFirestore db= getInstace();
@@ -76,6 +81,15 @@ public class FirestoreManager {
                 }
             }
         });
+            countDownLatchFirebase.countDown();
+        });
+
+        // Esperar a que la tarea asíncrona termine antes de retornar la lista
+        try{
+            countDownLatchFirebase.await();
+        }catch (InterruptedException ei){
+            ei.printStackTrace();
+        }
 
     }
 }
