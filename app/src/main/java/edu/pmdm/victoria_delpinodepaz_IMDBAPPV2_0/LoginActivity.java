@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
                         Log.e(TAG, "Error al obtener las credenciales de Google", e);
                     }
                 } else {
-                    Log.w(TAG, "Inicio de sesión cancelado o fallido");
+                    Log.w(TAG, "Inicio de sesión cancelado o fallido\n\n"+result.getResultCode()+"\n"+result.getData().toString()+"\n");
                 }
             });
 

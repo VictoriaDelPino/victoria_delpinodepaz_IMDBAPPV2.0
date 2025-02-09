@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -28,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
 
 //lase principal de la aplicación que gestiona la navegación y muestra la interfaz principal.
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializa la base de datos local
         DBManager.init(this);
+        //Comprobacion de que el usuario tiene los datos en firestore
+        FirestoreManager.createUser();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

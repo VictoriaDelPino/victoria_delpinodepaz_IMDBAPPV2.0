@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ApiConnection.ApiIMBD;
@@ -52,7 +53,8 @@ public class HomeFragment extends Fragment {
 
     private void setupRecyclerView() {
         //Llama a la API para cargar el top 10 de películas
-        movieList = ApiIMBD.getTop10Movie();
+        movieList=new ArrayList<>();
+        //movieList = ApiIMBD.getTop10Movie();
 
         // Configura RecyclerView con GridLayoutManager para 2 columnas
         binding.recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));

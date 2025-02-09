@@ -60,4 +60,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
 
 // Google Sign-In y One Tap
-    implementation("com.google.android.gms:play-services-auth:20.6.0")}
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
+//Firestore
+    implementation("com.google.firebase:firebase-firestore:25.1.2")}
