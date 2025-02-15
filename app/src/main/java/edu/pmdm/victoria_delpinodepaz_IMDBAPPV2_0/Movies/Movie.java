@@ -16,7 +16,7 @@ public class Movie implements Parcelable {
     public Movie() {
     }
 
-    public Movie(String description, String title, String photo, String rating, String releaseDate, String id) {
+    public Movie(String description, String title, String photo, String releaseDate, String id, String rating) {
         this.description = description;
         this.title = title;
         this.photo = photo;

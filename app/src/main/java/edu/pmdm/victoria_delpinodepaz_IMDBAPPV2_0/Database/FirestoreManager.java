@@ -1,18 +1,26 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
 
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.UserCallback;
 
 public class FirestoreManager {
 
@@ -23,7 +31,7 @@ public class FirestoreManager {
         return dbFirestore;
     }
 
-    public static void createUser(){
+    public static void createUser(EmptyCallback callback){
         CountDownLatch countDownLatchFirebase= new CountDownLatch(1);
         executorService.execute(() -> {
         //implementar tambien un ejecutor
@@ -72,14 +80,16 @@ public class FirestoreManager {
                                             addOnFailureListener(e -> {
                                                 Log.w("Error_Firebase", e.getMessage());
                                             });
-
+                                    callback.onResult(true);
                                  })
                                 .addOnFailureListener(e -> {
                                     Log.w("Error_Firebase", e.getMessage());
+                                    callback.onResult(false);
                                 });
                     }
                 }
             }
+
         });
             countDownLatchFirebase.countDown();
         });
@@ -91,5 +101,28 @@ public class FirestoreManager {
             ei.printStackTrace();
         }
 
+    }
+
+    public static void getUser(String email, UserCallback callback){
+        FirebaseFirestore db=getInstace();
+        db.collection("users").whereEqualTo("email",email).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                QuerySnapshot documents= task.getResult();
+                if(documents.isEmpty()) {
+                    callback.onResult(null);
+                }else{
+                    DocumentSnapshot doc=documents.getDocuments().get(0);
+                    String user_id=doc.get("user_id").toString();
+                    String phone= doc.get("phone").toString();
+                    String name= doc.get("name").toString();
+                    String image=doc.get("image").toString();
+                    String emailGot=doc.get("email").toString();
+                    String address= doc.get("address").toString();
+                    //Añadir activity_log
+                    User user= new User(new ArrayList<>(),address,emailGot,image,name, phone,user_id);
+                    callback.onResult(user);
+                }
+            }
+        } );
     }
 }

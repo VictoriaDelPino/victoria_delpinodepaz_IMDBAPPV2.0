@@ -30,6 +30,7 @@ import java.net.URL;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.FirestoreManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
 
 //lase principal de la aplicación que gestiona la navegación y muestra la interfaz principal.
@@ -37,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
+
     private Button btnLogOut;
     private TextView txtEmail;
     private TextView txtUserName;
@@ -49,19 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        // Inicializa la base de datos local
-        DBManager.init(this);
 
-        // Obtiene la instancia de Firebase Auth y el usuario actual
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-
-        //Comprobacion de que el usuario tiene los datos en firestore
-        if (currentUser != null) {
-            FirestoreManager.createUser();
-        } else {
-            Log.w("FirebaseAuth", "El usuario no ha iniciado sesión.");
-        }
 
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -70,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        if (currentUser != null) {
+        if (AppPersistance.user != null) {
             // Usuario autenticado
-            Log.d("NavigationDrawer", "Usuario: " + currentUser.getEmail());
+            Log.d("NavigationDrawer", "Usuario: " + AppPersistance.user.getEmail());
         } else {
             // Si no hay un usuario autenticado, redirige a la pantalla de inicio de sesión
             startActivity(new Intent(this, LoginActivity.class));
@@ -100,12 +88,12 @@ public class MainActivity extends AppCompatActivity {
         imgUserPhoto = headerView.findViewById(R.id.imgUserPhoto);
 
         // Si hay un usuario autenticado, muestra su información
-        if(currentUser!=null) {
-            txtEmail.setText(currentUser.getEmail());
-            txtUserName.setText(currentUser.getDisplayName());
+        if(AppPersistance.user!=null) {
+            txtEmail.setText(AppPersistance.user.getEmail());
+            txtUserName.setText(AppPersistance.user.getName());
             // Descarga y establece la imagen del usuario de forma asíncrona
             new Thread(() -> {
-                Bitmap bitmap = downloadImage(currentUser.getPhotoUrl().toString());
+                Bitmap bitmap = downloadImage(AppPersistance.user.getImage());
                 runOnUiThread(() -> {
                     if (bitmap != null) {
                         imgUserPhoto.setImageBitmap(bitmap);
@@ -121,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, getString(R.string.session_closed), Toast.LENGTH_SHORT).show();
-                mAuth.signOut();
+                FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();
             }
