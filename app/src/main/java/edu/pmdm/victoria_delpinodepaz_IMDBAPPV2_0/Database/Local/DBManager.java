@@ -1,4 +1,4 @@
-package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
+package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +9,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
@@ -27,8 +28,8 @@ public class DBManager {
     }
 
     // Obtiene la lista de películas favoritas de un usuario específico.
-    public static List<Movie> getUserFavorites(String userEmail) {
-        List<Movie> movieList = new ArrayList<>();
+    public static List<Favorite> getUserFavorites(String userEmail) {
+        List<Favorite> movieList = new ArrayList<>();
         SQLiteDatabase db = dBhelper.getReadableDatabase();
 
         // Consulta SQL para obtener las películas favoritas del usuario
@@ -36,7 +37,7 @@ public class DBManager {
 
         try (Cursor cursor = db.rawQuery(SQL, new String[]{userEmail})) {
             while (cursor.moveToNext()) {
-                Movie movie = new Movie();
+                Favorite movie = new Favorite();
                 movie.setId(cursor.getString(cursor.getColumnIndexOrThrow("movie_id")));
                 movie.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("title")));
                 movie.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("description")));

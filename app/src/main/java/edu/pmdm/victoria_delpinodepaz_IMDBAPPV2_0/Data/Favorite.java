@@ -6,4 +6,8 @@ public class Favorite extends Movie {
     public Favorite(String description, String title, String photo, String releaseDate, String id){
         super(description,title, photo,releaseDate,id,"");
     }
+
+    public Favorite(){
+        super();
+    }
 }

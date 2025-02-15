@@ -1,6 +1,6 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ui.gallery;
 
-import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager.deleteUserFavorite;
+import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager.deleteUserFavorite;
 
 import android.Manifest;
 import android.content.Intent;
@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.FavoritesFragment;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MovieActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
@@ -65,7 +65,7 @@ public class GalleryFragment extends Fragment {
 
         // Obtiene la lista de películas favoritas del usuario desde la base de datos
         try {
-            movieList = DBManager.getUserFavorites(userEmail);
+           // movieList = DBManager.getUserFavorites(userEmail);
         } catch (Exception e) {
             Log.e("Error", "Error en DB", e);
         }

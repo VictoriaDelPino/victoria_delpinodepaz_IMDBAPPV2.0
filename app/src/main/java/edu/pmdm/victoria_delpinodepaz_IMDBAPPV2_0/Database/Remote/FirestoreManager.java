@@ -1,7 +1,6 @@
-package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
+package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote;
 
 import android.util.Log;
-import android.util.Pair;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -10,7 +9,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +17,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.UserCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class FirestoreManager {
 
@@ -124,5 +124,53 @@ public class FirestoreManager {
                 }
             }
         } );
+    }
+
+    public static void addFavorite(Favorite favorite, EmptyCallback callback){
+        FirebaseFirestore bd= getInstace();
+
+        bd.collection("favorites")
+                .document(AppPersistance.user.getUser_id())
+                .collection("movies")
+                .get()
+                .addOnCompleteListener(
+                    task->{
+                       if(task.isSuccessful()){
+                           QuerySnapshot querySnapshot= task.getResult();
+                           if(!querySnapshot.isEmpty()){
+                               Boolean exist= false;
+                               for (DocumentSnapshot doc: querySnapshot.getDocuments()){
+                                   if(doc.getId().equals(favorite.getId())){
+                                       exist=true;
+                                   }
+                               }
+                               if(exist){
+                                   callback.onResult(false);
+                               }
+                               else{
+                                   Map<String, Object> newDoc= new HashMap<>();
+                                   newDoc.put("id", favorite.getId());
+                                   newDoc.put("overview",favorite.getDescription());
+                                   newDoc.put("posterURL",favorite.getPhoto());
+                                   newDoc.put("rating","");
+                                   newDoc.put("releaseDate", favorite.getReleaseDate());
+                                   newDoc.put("title", favorite.getTitle());
+
+                                   bd.collection("favorites")
+                                           .document(AppPersistance.user.getUser_id())
+                                           .collection("movies")
+                                           .document(favorite.getId())
+                                           .set(newDoc)
+                                           .addOnSuccessListener(
+                                                   aVoid->{
+                                                        callback.onResult(true);
+                                                   });
+                               }
+                           }
+
+                       }
+
+                    }
+        );
     }
 }

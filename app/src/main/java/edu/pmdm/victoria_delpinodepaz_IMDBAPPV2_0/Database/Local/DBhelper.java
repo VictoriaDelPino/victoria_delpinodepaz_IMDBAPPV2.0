@@ -1,4 +1,4 @@
-package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
+package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

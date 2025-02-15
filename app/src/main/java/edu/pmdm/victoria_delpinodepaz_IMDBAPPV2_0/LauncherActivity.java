@@ -16,9 +16,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.FirestoreManager;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.App;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class LauncherActivity extends AppCompatActivity {

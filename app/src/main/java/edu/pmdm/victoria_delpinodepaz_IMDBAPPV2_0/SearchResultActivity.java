@@ -16,12 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ApiConnection.ApiTMDB;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 
 //Actividad que muestra las películas filtrada en la api TMDB
@@ -99,6 +102,18 @@ public class SearchResultActivity extends AppCompatActivity {
                     // Intenta guardar la película en la base de datos
                     try {
                         DBManager.setUserFavorite(userEmail, movie);
+                        Favorite fav=new Favorite(movie.getDescription(), movie.getTitle(), movie.getPhoto(), movie.getReleaseDate(),movie.getId());
+
+                        FirestoreManager.addFavorite(fav,res->{
+                            Toast.makeText(
+                                    SearchResultActivity.this,
+                                    "Resultado addFavoriteFirebase: "+res,
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                            Log.d("FirebaseFav","Resultado addFavoriteFirebase: "+res);
+                        });
+
+
                         Toast.makeText(SearchResultActivity.this, movie.getTitle() +" "+ getString(R.string.save_as_favorite), Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(
