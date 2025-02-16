@@ -63,7 +63,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.6.0")
 //Facebook
     implementation("com.facebook.android:facebook-android-sdk:16.0.0")
-
+    //Core de firebase para operaciones complejas
+    implementation("com.google.firebase:firebase-core:21.1.1")
 //Firestore
     implementation("com.google.firebase:firebase-firestore:25.1.2")
 

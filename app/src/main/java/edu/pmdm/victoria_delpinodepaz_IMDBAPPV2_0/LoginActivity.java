@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
@@ -31,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirebaseAuthManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
@@ -85,6 +87,14 @@ public class LoginActivity extends AppCompatActivity {
                                 .build())
                 .build();
 
+        Button btnRegisterEmail=findViewById(R.id.btnRegisterEmail);
+        btnRegisterEmail.setOnClickListener(v->{
+            EditText eTxtEmail=findViewById(R.id.eTxtEmail);
+            String email= eTxtEmail.getText().toString();
+            EditText eTxtPassword=findViewById(R.id.eTxtPassword);
+            String password= eTxtPassword.getText().toString();
+            FirebaseAuthManager.register(this, email, password);
+        });
 
 
 
