@@ -9,18 +9,28 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.common.api.ApiException;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
@@ -74,6 +84,45 @@ public class LoginActivity extends AppCompatActivity {
                                 .setFilterByAuthorizedAccounts(false)
                                 .build())
                 .build();
+
+
+
+
+        LoginButton fbLogingBnt= findViewById(R.id.login_button);
+        fbLogingBnt.setPermissions("email","public_profile");
+        CallbackManager callbackManager= CallbackManager.Factory.create() ;
+        fbLogingBnt.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                setContentView(R.layout.activity_launcher);
+                FirebaseAuth.getInstance().signInWithCredential(FacebookAuthProvider.getCredential(loginResult.getAccessToken().getToken()))
+                        .addOnCompleteListener(LoginActivity.this,task -> {
+                            if(task.isSuccessful()){
+                                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                                updateUI( user);
+                                // Log.d("Facebook_Login",user.getEmail());
+                            }
+                        });
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(@NonNull FacebookException e) {
+
+            }
+        });
+
+
+
+
+
+
+
+
 
         // Asigna el botón de inicio de sesión y define su comportamiento
         Button signInButton = findViewById(R.id.signInButton);
@@ -153,13 +202,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
                 });
 
-
-
-          /*
-            //create user
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finishAffinity();*/
         } else {
             Log.d(TAG, "Usuario no autenticado");
         }
