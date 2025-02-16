@@ -24,7 +24,6 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class FirestoreManager {
 
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     private static FirebaseFirestore getInstace(){
         FirebaseFirestore dbFirestore= FirebaseFirestore.getInstance();
@@ -32,8 +31,7 @@ public class FirestoreManager {
     }
 
     public static void createUser(EmptyCallback callback){
-        CountDownLatch countDownLatchFirebase= new CountDownLatch(1);
-        executorService.execute(() -> {
+
         //implementar tambien un ejecutor
         String email=FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseFirestore db= getInstace();
@@ -91,15 +89,7 @@ public class FirestoreManager {
             }
 
         });
-            countDownLatchFirebase.countDown();
-        });
 
-        // Esperar a que la tarea asíncrona termine antes de retornar la lista
-        try{
-            countDownLatchFirebase.await();
-        }catch (InterruptedException ei){
-            ei.printStackTrace();
-        }
 
     }
 
@@ -133,44 +123,51 @@ public class FirestoreManager {
                 .document(AppPersistance.user.getUser_id())
                 .collection("movies")
                 .get()
-                .addOnCompleteListener(
-                    task->{
-                       if(task.isSuccessful()){
-                           QuerySnapshot querySnapshot= task.getResult();
-                           if(!querySnapshot.isEmpty()){
-                               Boolean exist= false;
-                               for (DocumentSnapshot doc: querySnapshot.getDocuments()){
-                                   if(doc.getId().equals(favorite.getId())){
-                                       exist=true;
-                                   }
-                               }
-                               if(exist){
-                                   callback.onResult(false);
-                               }
-                               else{
-                                   Map<String, Object> newDoc= new HashMap<>();
-                                   newDoc.put("id", favorite.getId());
-                                   newDoc.put("overview",favorite.getDescription());
-                                   newDoc.put("posterURL",favorite.getPhoto());
-                                   newDoc.put("rating","");
-                                   newDoc.put("releaseDate", favorite.getReleaseDate());
-                                   newDoc.put("title", favorite.getTitle());
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        boolean exist = false;
 
-                                   bd.collection("favorites")
-                                           .document(AppPersistance.user.getUser_id())
-                                           .collection("movies")
-                                           .document(favorite.getId())
-                                           .set(newDoc)
-                                           .addOnSuccessListener(
-                                                   aVoid->{
-                                                        callback.onResult(true);
-                                                   });
-                               }
-                           }
+                        if (!querySnapshot.isEmpty()) {
+                            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                                if (doc.getId().equals(favorite.getId())) {
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                        }
 
-                       }
+                        if (!exist) {
+                            Map<String, Object> newDoc = new HashMap<>();
+                            newDoc.put("id", favorite.getId());
+                            newDoc.put("overview", favorite.getDescription());
+                            newDoc.put("posterURL", favorite.getPhoto());
+                            newDoc.put("rating", "");
+                            newDoc.put("releaseDate", favorite.getReleaseDate());
+                            newDoc.put("title", favorite.getTitle());
 
+                            bd.collection("favorites")
+                                    .document(AppPersistance.user.getUser_id())
+                                    .collection("movies")
+                                    .document(favorite.getId())
+                                    .set(newDoc)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("FirestoreFav", "Película añadida con éxito");
+                                        callback.onResult(true);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("FirestoreError", "Error al añadir película", e);
+                                        callback.onResult(false);
+                                    });
+                        } else {
+                            Log.d("FirestoreFav", "La película ya estaba en favoritos");
+                            callback.onResult(false);
+                        }
+                    } else {
+                        Log.e("FirestoreError", "Error al obtener colección de películas", task.getException());
+                        callback.onResult(false);
                     }
-        );
+                });
+
     }
 }

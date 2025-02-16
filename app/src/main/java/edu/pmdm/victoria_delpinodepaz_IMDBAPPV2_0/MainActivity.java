@@ -54,14 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        if (AppPersistance.user != null) {
-            // Usuario autenticado
-            Log.d("NavigationDrawer", "Usuario: " + AppPersistance.user.getEmail());
-        } else {
-            // Si no hay un usuario autenticado, redirige a la pantalla de inicio de sesión
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        }
+
 
         // Configuración del Navigation Drawer
         DrawerLayout drawer = binding.drawerLayout;

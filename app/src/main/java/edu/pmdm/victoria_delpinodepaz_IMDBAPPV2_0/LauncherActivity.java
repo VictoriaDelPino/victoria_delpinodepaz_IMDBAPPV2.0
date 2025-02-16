@@ -45,15 +45,18 @@ public class LauncherActivity extends AppCompatActivity {
             public void run() {
                 //Comprobacion de que el usuario tiene los datos en firestore
                 if (fbUser != null) {
-                    FirestoreManager.createUser(res->{
                         FirestoreManager.getUser(fbUser.getEmail(),resultUser ->{
-                            if (resultUser!=null){
-                                AppPersistance.user=resultUser;
+                            if (resultUser != null) {
+                                AppPersistance.user = resultUser;
+                                Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+                                Intent intent = new Intent(context, MainActivity.class);
+                                startActivity(intent);
+                            } else {
+                                Log.e("FirestoreError", "No se pudo obtener el usuario desde Firestore");
+                                startActivity(new Intent(context, LoginActivity.class));
                             }
-                            Intent intent=new Intent(context, MainActivity.class);
-                            startActivity(intent);
                         });
-                    });
+
 
                 } else {
                     startActivity(new Intent(context, LoginActivity.class));

@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:63826498706:android:3272b0273af1dee921c24b",
+        "mobilesdk_app_id": "1:63826498706:android:2ace48850afee0c721c24b",
         "android_client_info": {
-          "package_name": "edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0"
+          "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC2hkQF2LkeL9m2PrK_fKgK9rUK_rckl_Y"
@@ -20,7 +25,49 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63826498706:android:3272b0273af1dee921c24b",
+        "android_client_info": {
+          "package_name": "edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63826498706-s4q9a177gkjl5vgl3oij4d9puvegohdk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0",
+            "certificate_hash": "0f6547d0dd607030bcd84a52f280615a10013843"
+          }
+        },
+        {
+          "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2hkQF2LkeL9m2PrK_fKgK9rUK_rckl_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
