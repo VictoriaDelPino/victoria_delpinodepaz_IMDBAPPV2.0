@@ -2,9 +2,13 @@ package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
@@ -87,6 +91,8 @@ public class LoginActivity extends AppCompatActivity {
                                 .build())
                 .build();
 
+        EditText editTextEmail=findViewById(R.id.eTxtEmail);
+
         Button btnRegisterEmail=findViewById(R.id.btnRegisterEmail);
         btnRegisterEmail.setOnClickListener(v->{
             EditText eTxtEmail=findViewById(R.id.eTxtEmail);
@@ -95,6 +101,32 @@ public class LoginActivity extends AppCompatActivity {
             String password= eTxtPassword.getText().toString();
             FirebaseAuthManager.register(this, email, password);
         });
+
+        Button btnLoginEmail=findViewById(R.id.btnLoginEmail);
+        btnLoginEmail.setOnClickListener(v -> {
+            EditText eTxtEmail = findViewById(R.id.eTxtEmail);
+            String email = eTxtEmail.getText().toString();
+            EditText eTxtPassword = findViewById(R.id.eTxtPassword);
+            String password = eTxtPassword.getText().toString();
+
+            FirebaseAuthManager.login(this, email, password, new FirebaseAuthManager.OnLoginListener() {
+                @Override
+                public void onSuccess() {
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    if (user != null) {
+                        updateUI(user);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Error: No se pudo obtener el usuario", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Toast.makeText(getApplicationContext(), "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
 
 
 
@@ -127,6 +159,22 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
+        editTextEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!Patterns.EMAIL_ADDRESS.matcher(s).matches()) {
+                    editTextEmail.setError("Correo electrónico inválido");
+                } else {
+                    editTextEmail.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
 
 

@@ -65,7 +65,7 @@ public class GalleryFragment extends Fragment {
 
         // Obtiene la lista de películas favoritas del usuario desde la base de datos
         try {
-           // movieList = DBManager.getUserFavorites(userEmail);
+            movieList = DBManager.getUserFavorites(userEmail);
         } catch (Exception e) {
             Log.e("Error", "Error en DB", e);
         }

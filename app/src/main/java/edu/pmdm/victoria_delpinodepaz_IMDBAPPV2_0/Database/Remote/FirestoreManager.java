@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.UserCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class FirestoreManager {
@@ -62,18 +62,6 @@ public class FirestoreManager {
                                     dataUpdate.put("user_id", documentReference.getId());
                                     documentReference.update(dataUpdate).
                                             addOnSuccessListener(task2 ->{
-                                                //Id de usuario actulizado con exito
-                                                //creamos su lista de favoritos
-                                                DocumentReference dRef= db.collection("favorites").document(documentReference.getId());
-                                                Map <String,Object> dataFavorites= new HashMap<>();
-                                                dataFavorites.put("movies","");
-                                                dRef.set(dataFavorites).
-                                                        addOnSuccessListener(task3 ->{
-                                                            Log.d("FirebaseOk", "Todo correcto");
-                                                        }).
-                                                        addOnFailureListener(e -> {
-                                                            Log.w("Error_Firebase", e.getMessage());
-                                                         });
                                             }).
                                             addOnFailureListener(e -> {
                                                 Log.w("Error_Firebase", e.getMessage());
@@ -118,7 +106,7 @@ public class FirestoreManager {
         } );
     }
 
-    public static void addFavorite(Favorite favorite, EmptyCallback callback){
+    public static void addFavorite(Movie favorite, EmptyCallback callback){
         FirebaseFirestore bd= getInstace();
 
         bd.collection("favorites")

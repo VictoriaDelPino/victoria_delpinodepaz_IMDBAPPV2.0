@@ -19,7 +19,6 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MovieActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
@@ -80,8 +79,7 @@ public class HomeFragment extends Fragment {
                     String userEmail = currentUser.getEmail();
                     // Intenta guardar la película en la lista de favoritos del usuario
                     try {
-                        Favorite fav=new Favorite(movie.getDescription(), movie.getTitle(), movie.getPhoto(), movie.getReleaseDate(),movie.getId());
-                        DBManager.setUserFavorite(userEmail, fav);
+                        DBManager.setUserFavorite(userEmail, movie);
                         Toast.makeText(
                                 getContext(),
                                 movie.getTitle() + " "+getString(R.string.save_as_favorite),

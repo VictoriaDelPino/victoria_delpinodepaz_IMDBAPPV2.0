@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ApiConnection.ApiTMDB;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
@@ -101,10 +100,9 @@ public class SearchResultActivity extends AppCompatActivity {
 
                     // Intenta guardar la película en la base de datos
                     try {
+                        DBManager.setUserFavorite(userEmail, movie);
 
-                        Favorite fav=new Favorite(movie.getDescription(), movie.getTitle(), movie.getPhoto(), movie.getReleaseDate(),movie.getId());
-                        DBManager.setUserFavorite(userEmail, fav);
-                        FirestoreManager.addFavorite(fav,res->{
+                        FirestoreManager.addFavorite(movie,res->{
                             Toast.makeText(
                                     SearchResultActivity.this,
                                     "Resultado addFavoriteFirebase: "+res,

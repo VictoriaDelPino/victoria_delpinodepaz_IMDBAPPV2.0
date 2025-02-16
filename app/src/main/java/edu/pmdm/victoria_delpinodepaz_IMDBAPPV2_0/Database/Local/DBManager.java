@@ -9,7 +9,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
@@ -28,8 +27,8 @@ public class DBManager {
     }
 
     // Obtiene la lista de películas favoritas de un usuario específico.
-    public static List<Favorite> getUserFavorites(String userEmail) {
-        List<Favorite> movieList = new ArrayList<>();
+    public static List<Movie> getUserFavorites(String userEmail) {
+        List<Movie> movieList = new ArrayList<>();
         SQLiteDatabase db = dBhelper.getReadableDatabase();
 
         // Consulta SQL para obtener las películas favoritas del usuario
@@ -37,7 +36,7 @@ public class DBManager {
 
         try (Cursor cursor = db.rawQuery(SQL, new String[]{userEmail})) {
             while (cursor.moveToNext()) {
-                Favorite movie = new Favorite();
+                Movie movie = new Movie();
                 movie.setId(cursor.getString(cursor.getColumnIndexOrThrow("movie_id")));
                 movie.setTitle(cursor.getString(cursor.getColumnIndexOrThrow("title")));
                 movie.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("description")));
@@ -53,7 +52,7 @@ public class DBManager {
 
     /*Agrega una película a la lista de favoritos de un usuario.
     Si la película ya existe en la base de datos, no se insertará de nuevo.*/
-    public static void setUserFavorite(String userEmail, Favorite movie) {
+    public static void setUserFavorite(String userEmail, Movie movie) {
         if (userEmail == null || userEmail.isEmpty() || movie == null) {
             Log.e("Database_", "Datos inválidos para favorito");
             return;
