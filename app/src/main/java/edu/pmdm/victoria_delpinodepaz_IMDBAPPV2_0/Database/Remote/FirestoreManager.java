@@ -160,4 +160,23 @@ public class FirestoreManager {
                 });
 
     }
+
+    public static void removeFavorite(String movieId, EmptyCallback callback) {
+        FirebaseFirestore db = getInstace();
+
+        db.collection("favorites")
+                .document(AppPersistance.user.getUser_id())
+                .collection("movies")
+                .document(movieId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("FirestoreFav", "Película eliminada con éxito");
+                    callback.onResult(true);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FirestoreError", "Error al eliminar película", e);
+                    callback.onResult(false);
+                });
+    }
+
 }

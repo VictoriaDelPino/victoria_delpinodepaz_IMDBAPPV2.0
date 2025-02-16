@@ -1,5 +1,6 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ui.gallery;
 
+
 import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager.deleteUserFavorite;
 
 import android.Manifest;
@@ -36,6 +37,7 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.FavoritesFragment;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MovieActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MyItemRecycleViewAdapter;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.R;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.FragmentGalleryBinding;
 
@@ -54,10 +56,6 @@ public class GalleryFragment extends Fragment {
         GalleryViewModel galleryViewModel =
                 new ViewModelProvider(this).get(GalleryViewModel.class);
 
-        // Obtiene usuario autenticado desde Firebase
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        userEmail = currentUser.getEmail();
-
         // Infla el layout con ViewBinding
         binding = FragmentGalleryBinding.inflate(inflater, container, false);
         btnShare = binding.btnShare;
@@ -65,7 +63,7 @@ public class GalleryFragment extends Fragment {
 
         // Obtiene la lista de películas favoritas del usuario desde la base de datos
         try {
-            movieList = DBManager.getUserFavorites(userEmail);
+            movieList = DBManager.getUserFavorites(AppPersistance.user.getUser_id());
         } catch (Exception e) {
             Log.e("Error", "Error en DB", e);
         }
@@ -171,7 +169,7 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onItemLongClick(Movie movie) {
                 // Elimina la película de la lista de favoritos en la base de datos
-                deleteUserFavorite(getContext(), userEmail, movie.getId());
+                deleteUserFavorite(getContext(), AppPersistance.user.getUser_id(), movie.getId());
                 // Elimina la película de la lista
                 movieList.remove(movie);
                 // Notifica al adaptador del cambio

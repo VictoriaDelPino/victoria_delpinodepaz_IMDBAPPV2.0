@@ -9,6 +9,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
@@ -27,14 +28,14 @@ public class DBManager {
     }
 
     // Obtiene la lista de películas favoritas de un usuario específico.
-    public static List<Movie> getUserFavorites(String userEmail) {
+    public static List<Movie> getUserFavorites(String user_id) {
         List<Movie> movieList = new ArrayList<>();
         SQLiteDatabase db = dBhelper.getReadableDatabase();
 
         // Consulta SQL para obtener las películas favoritas del usuario
         String SQL = "SELECT * FROM favorites WHERE user_id = ?";
 
-        try (Cursor cursor = db.rawQuery(SQL, new String[]{userEmail})) {
+        try (Cursor cursor = db.rawQuery(SQL, new String[]{user_id})) {
             while (cursor.moveToNext()) {
                 Movie movie = new Movie();
                 movie.setId(cursor.getString(cursor.getColumnIndexOrThrow("movie_id")));
@@ -52,8 +53,8 @@ public class DBManager {
 
     /*Agrega una película a la lista de favoritos de un usuario.
     Si la película ya existe en la base de datos, no se insertará de nuevo.*/
-    public static void setUserFavorite(String userEmail, Movie movie) {
-        if (userEmail == null || userEmail.isEmpty() || movie == null) {
+    public static void setUserFavorite(String user_id, Movie movie) {
+        if (user_id == null || user_id.isEmpty() || movie == null) {
             Log.e("Database_", "Datos inválidos para favorito");
             return;
         }
@@ -62,7 +63,7 @@ public class DBManager {
             String SQL = "INSERT OR IGNORE INTO favorites VALUES (?, ?, ?, ?, ?, ?)";
             SQLiteDatabase db = dBhelper.getWritableDatabase();
             db.execSQL(SQL, new Object[]{
-                    userEmail,
+                    user_id,
                     movie.getId(),
                     movie.getTitle(),
                     movie.getDescription(),
@@ -76,16 +77,26 @@ public class DBManager {
     }
 
     //Elimina una película de la lista de favoritos del usuario.
-    public static void deleteUserFavorite(Context context, String userEmail, String movieId) {
+    public static void deleteUserFavorite(Context context, String user_id, String movieId) {
         SQLiteDatabase db;
         try {
             db = dBhelper.getWritableDatabase();
             // Consulta SQL para eliminar la película favorita del usuario
             String SQL = "DELETE FROM favorites WHERE user_id = ? AND movie_id = ?";
-            db.execSQL(SQL, new Object[]{userEmail, movieId});
+            db.execSQL(SQL, new Object[]{user_id, movieId});
 
             // Notifica al usuario que la película ha sido eliminada
             Toast.makeText(context, "Película eliminada de favoritos", Toast.LENGTH_SHORT).show();
+
+            FirestoreManager.removeFavorite(movieId, success -> {
+                if (success) {
+                    Toast.makeText(context, "Película eliminada de favoritos firestore", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Error al eliminar película firestore", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
         } catch (Exception e) {
             Log.e("Error", "Error al eliminar favorito", e);
             Toast.makeText(context, "Error al eliminar la película", Toast.LENGTH_SHORT).show();

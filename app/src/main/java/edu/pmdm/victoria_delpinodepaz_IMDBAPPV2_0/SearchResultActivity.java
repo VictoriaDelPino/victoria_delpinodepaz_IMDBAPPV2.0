@@ -25,6 +25,7 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ApiConnection.ApiTMDB;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 //Actividad que muestra las películas filtrada en la api TMDB
 public class SearchResultActivity extends AppCompatActivity {
@@ -96,11 +97,10 @@ public class SearchResultActivity extends AppCompatActivity {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
                 if (currentUser != null) {
-                    String userEmail = currentUser.getEmail();
 
                     // Intenta guardar la película en la base de datos
                     try {
-                        DBManager.setUserFavorite(userEmail, movie);
+                        DBManager.setUserFavorite(AppPersistance.user.getUser_id(), movie);
 
                         FirestoreManager.addFavorite(movie,res->{
                             Toast.makeText(

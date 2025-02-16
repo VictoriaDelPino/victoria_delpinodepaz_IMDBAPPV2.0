@@ -23,6 +23,7 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MovieActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MyItemRecycleViewAdapter;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.R;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.FragmentHomeBinding;
 
@@ -79,7 +80,7 @@ public class HomeFragment extends Fragment {
                     String userEmail = currentUser.getEmail();
                     // Intenta guardar la película en la lista de favoritos del usuario
                     try {
-                        DBManager.setUserFavorite(userEmail, movie);
+                        DBManager.setUserFavorite(AppPersistance.user.getUser_id(), movie);
                         Toast.makeText(
                                 getContext(),
                                 movie.getTitle() + " "+getString(R.string.save_as_favorite),
