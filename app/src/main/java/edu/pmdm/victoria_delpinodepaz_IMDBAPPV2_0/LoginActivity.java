@@ -21,6 +21,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
+
 //Actividad encargada de gestionar el proceso de inicio de sesión con Google mediante Firebase.
 public class LoginActivity extends AppCompatActivity {
 
@@ -119,9 +122,44 @@ public class LoginActivity extends AppCompatActivity {
     //Actualiza la interfaz de usuario dependiendo de si el usuario está autenticado o no.
     private void updateUI(FirebaseUser user) {
         if (user != null) {
+                FirestoreManager.getUser(user.getEmail(), resultUser ->{
+                    if (resultUser != null) {
+                        AppPersistance.user = resultUser;
+                        Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+                        Intent intent = new Intent(this, MainActivity.class);
+                        startActivity(intent);
+                        finishAffinity();
+                    }
+                    else {
+                        FirestoreManager.createUser(result ->{
+                            if (result ) {
+                                if (user  != null) {
+                                    FirestoreManager.getUser(user.getEmail(),resultNewUser ->{
+                                        if (resultNewUser != null) {
+                                            AppPersistance.user = resultNewUser;
+                                            Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+                                            Intent intent = new Intent(this, MainActivity.class);
+                                            startActivity(intent);
+                                            finishAffinity();
+                                        } else {
+                                            Log.e("FirestoreError", "No se pudo obtener el usuario desde Firestore");
+                                        }
+                                    });
+                                }
+                            } else {
+                                Log.d("CREATE_USER","error al crear un nuevo usuario");
+                            }
+                        });
+                        }
+                });
+
+
+
+          /*
+            //create user
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
-            finishAffinity();
+            finishAffinity();*/
         } else {
             Log.d(TAG, "Usuario no autenticado");
         }

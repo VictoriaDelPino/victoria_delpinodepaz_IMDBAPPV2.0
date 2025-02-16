@@ -12,9 +12,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.Favorite;
@@ -49,11 +46,14 @@ public class FirestoreManager {
                     if(currentUser!=null) {
                         Map <String,String> data=new HashMap<>();
                         data.put("email", currentUser.getEmail());
-                        data.put("name", currentUser.getDisplayName());
+                        if(currentUser.getDisplayName()!=null)  data.put("name", currentUser.getDisplayName());
+                        else data.put("name", "");
                         data.put("user_id", "");
                         data.put("address","");
-                        data.put("phone", currentUser.getPhoneNumber());
-                        data.put("image", currentUser.getPhotoUrl().toString());
+                        if( currentUser.getPhoneNumber()!= null) data.put("phone", currentUser.getPhoneNumber());
+                        else data.put("phone", "");
+                        if(currentUser.getPhotoUrl()!=null) data.put("image", currentUser.getPhotoUrl().toString());
+                        else data.put("image", "");
                         data.put("activity_log","");
                         db.collection("users").add(data)
                                 .addOnSuccessListener(documentReference -> {
@@ -85,6 +85,8 @@ public class FirestoreManager {
                                     callback.onResult(false);
                                 });
                     }
+                }else{
+                    callback.onResult(false);
                 }
             }
 

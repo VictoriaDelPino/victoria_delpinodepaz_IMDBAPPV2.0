@@ -101,9 +101,9 @@ public class SearchResultActivity extends AppCompatActivity {
 
                     // Intenta guardar la película en la base de datos
                     try {
-                        DBManager.setUserFavorite(userEmail, movie);
-                        Favorite fav=new Favorite(movie.getDescription(), movie.getTitle(), movie.getPhoto(), movie.getReleaseDate(),movie.getId());
 
+                        Favorite fav=new Favorite(movie.getDescription(), movie.getTitle(), movie.getPhoto(), movie.getReleaseDate(),movie.getId());
+                        DBManager.setUserFavorite(userEmail, fav);
                         FirestoreManager.addFavorite(fav,res->{
                             Toast.makeText(
                                     SearchResultActivity.this,

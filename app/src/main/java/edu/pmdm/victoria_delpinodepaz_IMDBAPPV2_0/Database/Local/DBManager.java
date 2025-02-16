@@ -53,7 +53,7 @@ public class DBManager {
 
     /*Agrega una película a la lista de favoritos de un usuario.
     Si la película ya existe en la base de datos, no se insertará de nuevo.*/
-    public static void setUserFavorite(String userEmail, Movie movie) {
+    public static void setUserFavorite(String userEmail, Favorite movie) {
         if (userEmail == null || userEmail.isEmpty() || movie == null) {
             Log.e("Database_", "Datos inválidos para favorito");
             return;
