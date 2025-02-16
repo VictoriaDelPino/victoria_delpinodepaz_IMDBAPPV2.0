@@ -101,10 +101,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, getString(R.string.session_closed), Toast.LENGTH_SHORT).show();
                 FirebaseAuth.getInstance().signOut();
                 LoginManager.getInstance().logOut();
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
+               // startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                //finish();
+                restartApp();
             }
         });
+    }
+
+    // Método para reiniciar la aplicación
+    public void restartApp() {
+        // Crear un Intent para lanzar la actividad principal
+        Intent intent = new Intent(MainActivity.this, LauncherActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Iniciar la actividad
+        startActivity(intent);
+        // Finalizar la actividad actual
+        finish();
+
     }
 
     /*Método para descargar una imagen desde una URL.
