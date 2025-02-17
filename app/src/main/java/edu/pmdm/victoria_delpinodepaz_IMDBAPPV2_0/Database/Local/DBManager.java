@@ -1,5 +1,6 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.SearchResultActivity;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
  Proporciona métodos para inicializar la base de datos, obtener favoritos, agregar y eliminar películas favoritas.*/
@@ -53,7 +55,7 @@ public class DBManager {
 
     /*Agrega una película a la lista de favoritos de un usuario.
     Si la película ya existe en la base de datos, no se insertará de nuevo.*/
-    public static void setUserFavorite(String user_id, Movie movie) {
+    public static void setUserFavorite(Context context, String user_id, Movie movie) {
         if (user_id == null || user_id.isEmpty() || movie == null) {
             Log.e("Database_", "Datos inválidos para favorito");
             return;
@@ -69,6 +71,15 @@ public class DBManager {
                     movie.getDescription(),
                     movie.getReleaseDate(),
                     movie.getPhoto()
+            });
+
+            FirestoreManager.addFavorite(movie,res->{
+                Toast.makeText(
+                        context,
+                        "Resultado addFavoriteFirebase: "+res,
+                        Toast.LENGTH_SHORT
+                ).show();
+                Log.d("FirebaseFav","Resultado addFavoriteFirebase: "+res);
             });
         } catch (Exception e) {
             Log.e("Error", "Error al insertar favorito: " + e.getMessage(), e);

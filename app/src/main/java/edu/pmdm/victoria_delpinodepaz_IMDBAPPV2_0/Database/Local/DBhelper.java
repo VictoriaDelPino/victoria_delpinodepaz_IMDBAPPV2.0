@@ -28,7 +28,7 @@ public class DBhelper extends SQLiteOpenHelper {
      /*Constructor privado para evitar instancias directas.
       Se usa el patrón Singleton para asegurar que solo haya una instancia de la base de datos.
       context Contexto de la aplicación.*/
-    private DBhelper(Context context) {
+     public DBhelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

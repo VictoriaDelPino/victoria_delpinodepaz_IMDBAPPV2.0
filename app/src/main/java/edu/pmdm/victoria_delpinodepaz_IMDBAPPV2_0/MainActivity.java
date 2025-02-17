@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBSync;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
 
@@ -54,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.appBarMain.toolbar);
-
 
 
 
@@ -170,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        DBSync.syncFavoritesWithSQLite(new DBhelper(this));
+    }
 }

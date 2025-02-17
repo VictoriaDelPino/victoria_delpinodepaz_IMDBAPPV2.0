@@ -1,5 +1,6 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ui.home;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MainActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MovieActivity;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.MyItemRecycleViewAdapter;
@@ -33,6 +35,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private MyItemRecycleViewAdapter adapter;
     private List<Movie> movieList;
+    private HomeFragment context;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class HomeFragment extends Fragment {
         // Configura el RecyclerView con una lista de películas
         setupRecyclerView();
 
+        context = this;
         return root;
     }
 
@@ -80,7 +84,7 @@ public class HomeFragment extends Fragment {
                     String userEmail = currentUser.getEmail();
                     // Intenta guardar la película en la lista de favoritos del usuario
                     try {
-                        DBManager.setUserFavorite(AppPersistance.user.getUser_id(), movie);
+                        DBManager.setUserFavorite( getContext(),AppPersistance.user.getUser_id(), movie);
                         Toast.makeText(
                                 getContext(),
                                 movie.getTitle() + " "+getString(R.string.save_as_favorite),
