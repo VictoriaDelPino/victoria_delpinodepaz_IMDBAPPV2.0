@@ -175,5 +175,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         DBSync.syncFavoritesWithSQLite(MainActivity.this);
+        DBSync.syncFavoritesWithFirestore();
     }
 }

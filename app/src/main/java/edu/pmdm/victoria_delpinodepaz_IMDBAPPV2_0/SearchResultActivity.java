@@ -49,6 +49,7 @@ public class SearchResultActivity extends AppCompatActivity {
         });
 
         DBSync.syncFavoritesWithSQLite(this);
+        DBSync.syncFavoritesWithFirestore();
 
         // Obtiene los datos enviados a través del Intent
         Intent intent = getIntent();

@@ -2,6 +2,7 @@ package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,6 +33,19 @@ public class LauncherActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Obtener instancia de SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
+
+        if (isFirstRun) {
+            // Primera vez que se ejecuta después de una instalación → Cerrar sesión
+            FirebaseAuth.getInstance().signOut();
+
+            // Marcar que la app ya se ha ejecutado
+            prefs.edit().putBoolean("isFirstRun", false).apply();
+        }
+
 
         // Inicializa la base de datos local
         DBManager.init(this);

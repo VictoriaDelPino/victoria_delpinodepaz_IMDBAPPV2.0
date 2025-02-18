@@ -10,8 +10,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.SearchResultActivity;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
@@ -113,4 +115,34 @@ public class DBManager {
             Toast.makeText(context, "Error al eliminar la película", Toast.LENGTH_SHORT).show();
         }
     }
+    public static void addUser(Context context) {
+        User user= AppPersistance.user;
+
+        SQLiteDatabase db = dBhelper.getWritableDatabase();
+
+        String SQL = "INSERT OR IGNORE INTO users (user_id, name, email, image, address, phone, last_login, last_logout) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            db.execSQL(SQL, new Object[]{
+                    user.getUser_id(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getImage(),
+                    user.getAddress(),
+                    user.getPhone(),
+                    "",
+                    ""
+            });
+
+            Toast.makeText(context, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show();
+            Log.d("Database_", "Usuario agregado correctamente");
+
+        } catch (Exception e) {
+            Log.e("Error", "Error al insertar usuario: " + e.getMessage(), e);
+            Toast.makeText(context, "Error al agregar usuario", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
 }

@@ -10,7 +10,7 @@ public class DBhelper extends SQLiteOpenHelper {
      // Nombre del archivo de la base de datos
     private static final String DATABASE_NAME = "favoriteMovies.db";
      // Versión de la base de datos
-     private static final int DATABASE_VERSION = 1;
+     private static final int DATABASE_VERSION = 2;
      // Instancia única de DBhelper (patrón Singleton)
      private static DBhelper instance;
 
@@ -24,6 +24,17 @@ public class DBhelper extends SQLiteOpenHelper {
                     "release_date TEXT," +
                     "url_photo TEXT," +
                     "PRIMARY KEY (user_id, movie_id))";// Clave primaria compuesta (un usuario no puede guardar la misma película dos veces)
+
+     private static final String SQL_CREATE_USERS =
+             "CREATE TABLE users (" +
+                     "user_id TEXT PRIMARY KEY, " +
+                     "name TEXT, " +
+                     "email TEXT, " +
+                     "image TEXT, " +
+                     "address TEXT, " +
+                     "phone TEXT, " +
+                     "last_login TEXT, " +
+                     "last_logout TEXT)";
 
      /*Constructor privado para evitar instancias directas.
       Se usa el patrón Singleton para asegurar que solo haya una instancia de la base de datos.
@@ -48,9 +59,13 @@ public class DBhelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_FAVORITES);
+        db.execSQL(SQL_CREATE_USERS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS favorites");
+        db.execSQL("DROP TABLE IF EXISTS users");
+        onCreate(db);
     }
 }

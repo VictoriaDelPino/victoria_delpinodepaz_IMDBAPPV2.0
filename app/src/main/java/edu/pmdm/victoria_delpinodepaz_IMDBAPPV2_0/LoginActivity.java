@@ -1,5 +1,6 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -36,6 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirebaseAuthManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
@@ -232,6 +234,7 @@ public class LoginActivity extends AppCompatActivity {
                 FirestoreManager.getUser(user.getEmail(), resultUser ->{
                     if (resultUser != null) {
                         AppPersistance.user = resultUser;
+                        DBManager.addUser(this);
                         Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                         Intent intent = new Intent(this, MainActivity.class);
                         startActivity(intent);
@@ -244,6 +247,7 @@ public class LoginActivity extends AppCompatActivity {
                                     FirestoreManager.getUser(user.getEmail(),resultNewUser ->{
                                         if (resultNewUser != null) {
                                             AppPersistance.user = resultNewUser;
+                                            DBManager.addUser(this);
                                             Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                                             Intent intent = new Intent(this, MainActivity.class);
                                             startActivity(intent);
