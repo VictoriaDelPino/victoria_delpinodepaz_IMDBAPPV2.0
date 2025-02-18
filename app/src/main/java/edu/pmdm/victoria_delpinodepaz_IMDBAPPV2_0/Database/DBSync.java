@@ -1,5 +1,9 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
 
+import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager.deleteUserFavorite;
+import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager.setUserFavorite;
+
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -9,11 +13,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class DBSync {
 
-    public static void syncFavoritesWithSQLite(DBhelper dbHelper) {
+    public static void syncFavoritesWithSQLite(Context context) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String userId = AppPersistance.user.getUser_id();
 
@@ -24,8 +29,7 @@ public class DBSync {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        SQLiteDatabase database = dbHelper.getWritableDatabase();
-                        database.beginTransaction();
+
                         try {
                             for (DocumentSnapshot doc : task.getResult()) {
                                 String movieId = doc.getId();
@@ -33,16 +37,12 @@ public class DBSync {
                                 String description = doc.getString("overview");
                                 String releaseDate = doc.getString("releaseDate");
                                 String photoUrl = doc.getString("posterURL");
+                                Movie movie= new Movie(description,title,photoUrl,releaseDate,movieId, "");
 
-                                database.execSQL("INSERT OR REPLACE INTO favorites (user_id, movie_id, title, description, release_date, poster_url) VALUES (?, ?, ?, ?, ?, ?)",
-                                        new Object[]{userId, movieId, title, description, releaseDate, photoUrl});
+                                setUserFavorite(context,AppPersistance.user.getUser_id(), movie);
                             }
-                            database.setTransactionSuccessful();
                         } catch (Exception e) {
                             Log.e("FirestoreSync", "Error al sincronizar favoritos iniciales", e);
-                        } finally {
-                            database.endTransaction();
-                            database.close();
                         }
                     }
                 });
@@ -57,7 +57,6 @@ public class DBSync {
                         return;
                     }
 
-                    SQLiteDatabase database = dbHelper.getWritableDatabase();
                     try {
                         for (DocumentChange dc : snapshots.getDocumentChanges()) {
                             DocumentSnapshot doc = dc.getDocument();
@@ -66,23 +65,19 @@ public class DBSync {
                             String description = doc.getString("overview");
                             String releaseDate = doc.getString("releaseDate");
                             String photoUrl = doc.getString("posterURL");
-
+                            Movie movie= new Movie(description,title,photoUrl,releaseDate,movieId, "");
                             switch (dc.getType()) {
                                 case ADDED:
                                 case MODIFIED:
-                                    database.execSQL("INSERT OR REPLACE INTO favorites (user_id, movie_id, title, description, release_date, poster_url) VALUES (?, ?, ?, ?, ?, ?)",
-                                            new Object[]{userId, movieId, title, description, releaseDate, photoUrl});
+                                    setUserFavorite(context,AppPersistance.user.getUser_id(), movie);
                                     break;
                                 case REMOVED:
-                                    database.execSQL("DELETE FROM favorites WHERE user_id = ? AND movie_id = ?",
-                                            new Object[]{userId, movieId});
+                                    deleteUserFavorite(context,AppPersistance.user.getUser_id(), movieId);
                                     break;
                             }
                         }
                     } catch (Exception ex) {
                         Log.e("FirestoreSync", "Error al sincronizar la base de datos SQLite en tiempo real", ex);
-                    } finally {
-                        database.close();
                     }
                 });
     }

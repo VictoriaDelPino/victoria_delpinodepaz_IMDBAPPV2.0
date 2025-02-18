@@ -48,7 +48,7 @@ public class SearchResultActivity extends AppCompatActivity {
             return insets;
         });
 
-        DBSync.syncFavoritesWithSQLite(new DBhelper(this));
+        DBSync.syncFavoritesWithSQLite(this);
 
         // Obtiene los datos enviados a través del Intent
         Intent intent = getIntent();

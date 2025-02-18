@@ -174,6 +174,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        DBSync.syncFavoritesWithSQLite(new DBhelper(this));
+        DBSync.syncFavoritesWithSQLite(MainActivity.this);
     }
 }
