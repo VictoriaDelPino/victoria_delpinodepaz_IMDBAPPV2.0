@@ -18,10 +18,13 @@ public class ApiIMBD {
     // Claves y valores para la autenticación en la API de RapidAPI
     private static final String HEADER_KEY = "x-rapidapi-key";
     private static final String HEADER_HOST = "x-rapidapi-host";
-    private static final String API_KEY_1 = "586f49b130msh99155cbad4559f5p12735bjsn219e7f19e09e";
-    private static final String API_KEY_2 = "c6fe9d2717msh7eeaffed3f84584p1c3319jsn676081a570f9";
-   // private static final String API_KEY_3 = "5f871d3eeemsh5a94169685bb269p1e3fd8jsn031f2b0f5978";
-    public static String api_key;
+    private static final String API_KEY_1 = "c6fe9d2717msh7eeaffed3f84584p1c3319jsn676081a570f9";
+    private static final String API_KEY_2 = "586f49b130msh99155cbad4559f5p12735bjsn219e7f19e09e";
+    private static final String API_KEY_3 = "5f871d3eeemsh5a94169685bb269p1e3fd8jsn031f2b0f5978";
+    private static final List<String> API_KEYS = Arrays.asList(
+            API_KEY_1, API_KEY_2, API_KEY_3);
+    private static int apiKeyIndex = 0;
+    private static String apiKey = API_KEYS.get(apiKeyIndex);
     private static final String HEADER_VALUE = "imdb-com.p.rapidapi.com";
     // Tiempo de espera para las solicitudes en milisegundos
     private static final int TIMEOUT = 5000;
@@ -29,10 +32,6 @@ public class ApiIMBD {
     private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
     // Lista compartida de películas obtenidas de la API
     private static final List<Movie> moviesList = new ArrayList<>();
-
-    private static final List<String> API_KEYS = Arrays.asList(API_KEY_1, API_KEY_2/*, API_KEY_3*/);
-    private static int apiKeyIndex = 1;
-    private static String apiKey = API_KEYS.get(apiKeyIndex);
 
     // Interfaz para manejar la recepción de la sinopsis de una película
     public interface MovieOverviewCallback {
@@ -42,9 +41,8 @@ public class ApiIMBD {
     private static synchronized void switchApiKey() {
         apiKeyIndex = (apiKeyIndex + 1) % API_KEYS.size();
         apiKey = API_KEYS.get(apiKeyIndex);
-        Log.d("API", "Cambiando API Key a: " + apiKeyIndex);
+        Log.d("API_cambio", "Cambiando API Key a: " + apiKeyIndex);
     }
-
 
     /* Método para obtener el top 10 de películas desde la API de IMDb.
      * Se ejecuta en un hilo separado usando un ExecutorService.
@@ -54,8 +52,8 @@ public class ApiIMBD {
         CountDownLatch countDownLatch= new CountDownLatch(1);
 
         executorService.execute(() -> {
-           // boolean success = false;
-           // while (!success) {
+            boolean success = false;
+            while (!success) {
             try {
                 // URL de la API para obtener el ranking de películas
                 String URLstring = "https://imdb-com.p.rapidapi.com/title/get-top-meter?topMeterTitlesType=ALL";
@@ -68,13 +66,13 @@ public class ApiIMBD {
                 connection.setRequestProperty(HEADER_HOST, HEADER_VALUE);
                 connection.setConnectTimeout(TIMEOUT);
                 connection.setReadTimeout(TIMEOUT);
-
-                // Validación del código de respuesta HTTP cambio de api key
+                Log.d("API_cambio", "Cambiando API Key a: " + apiKey);
+                // Validación del código de respuesta HTTP
                 int responseCode = connection.getResponseCode();
-             /*   if (responseCode == 429 || responseCode != 200) {
+                if (responseCode == 429 || responseCode != 200) {
                     switchApiKey();
                     continue;
-                }*/
+                }
 
                 // Lectura de la respuesta JSON de la API
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -146,8 +144,8 @@ public class ApiIMBD {
 
             // Contador de finalización de la tarea principal
             countDownLatch.countDown();
-           /* success=true;
-        }*/
+            success = true;
+        }
         });
 
         // Esperar a que la tarea asíncrona termine antes de retornar la lista
@@ -162,8 +160,8 @@ public class ApiIMBD {
     // Método para obtener la sinopsis de una película en función de su ID.
     public static void getMovieOverview(String movieID, MovieOverviewCallback callback) {
         executorService.submit(() -> {
-           /* boolean success = false;
-            while (!success) {*/
+            boolean success = false;
+            while (!success) {
             try {
                 // URL de la API para obtener la sinopsis de la película
                 String URLstring = "https://imdb-com.p.rapidapi.com/title/get-overview?tconst=" + movieID;
@@ -172,17 +170,23 @@ public class ApiIMBD {
                 // Configuración de la conexión HTTP
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                connection.setRequestProperty(HEADER_KEY, API_KEY_1);
+                connection.setRequestProperty(HEADER_KEY, apiKey);
                 connection.setRequestProperty(HEADER_HOST, HEADER_VALUE);
                 connection.setConnectTimeout(TIMEOUT);
                 connection.setReadTimeout(TIMEOUT);
 
-                // Manejo de error 429 (demasiadas solicitudes): cambia la apikey
-               /* int responseCode = connection.getResponseCode();
-                if (responseCode == 429 || responseCode != 200) {
-                    switchApiKey();
-                    continue;
-                }*/
+                // Manejo de error 429 (demasiadas solicitudes): espera y reintenta
+                int responseCode = connection.getResponseCode();
+                if (responseCode == 429) {
+                    Thread.sleep(3000);
+                    getMovieOverview(movieID, callback);
+                    return;
+                }
+                if (responseCode != 200) {
+                    Log.d("Error", "API Response Code: " + responseCode);
+                    callback.onOverviewReceived("");
+                    return;
+                }
 
                 // Lectura de la respuesta JSON
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -208,8 +212,10 @@ public class ApiIMBD {
                 Log.d("Error", "Error: " + e.getMessage());
                 callback.onOverviewReceived("");
             }
-              /*  success = true;
-        }*/
+            success = true;
+        }
+
         });
     }
 }
+
