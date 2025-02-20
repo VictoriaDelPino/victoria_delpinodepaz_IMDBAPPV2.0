@@ -1,21 +1,32 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.gson.Gson;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -37,6 +48,9 @@ public class EditUserActivity extends AppCompatActivity {
     private Button btnSave;
     private ImageView imgPhoto;
     private Spinner spinnerPhoneCodes;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_GALLERY = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,12 +107,61 @@ public class EditUserActivity extends AppCompatActivity {
         spinnerPhoneCodes.setSelection(defaultIndex);
 
 
-
-
-
-
+        // Configura el botón para seleccionar imagen
+        btnPhoto.setOnClickListener(v -> {
+            String[] opciones = {"Cámara", "Galería", "URL Externa"};
+            new AlertDialog.Builder(EditUserActivity.this)
+                    .setTitle("Seleccionar imagen")
+                    .setItems(opciones, (dialog, which) -> {
+                        switch (which) {
+                            case 0: // Cámara
+                                if (ContextCompat.checkSelfPermission(EditUserActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                    ActivityCompat.requestPermissions(EditUserActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
+                                } else {
+                                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+                                }
+                                break;
+                            case 1: // Galería
+                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(galleryIntent, REQUEST_IMAGE_GALLERY);
+                                break;
+                            case 2: // URL Externa
+                                showUrlInputDialog();
+                                break;
+                        }
+                    })
+                    .show();
+        });
     }
 
+    // Muestra un diálogo para introducir la URL de la imagen
+    private void showUrlInputDialog() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        new AlertDialog.Builder(this)
+                .setTitle("Ingresar URL de la imagen")
+                .setView(input)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    String url = input.getText().toString().trim();
+                    if (!url.isEmpty()) {
+                        new Thread(() -> {
+                            Bitmap bitmap = downloadImage(url);
+                            runOnUiThread(() -> {
+                                if (bitmap != null) {
+                                    imgPhoto.setImageBitmap(bitmap);
+                                } else {
+                                    Toast.makeText(EditUserActivity.this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }).start();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    // Método para descargar una imagen desde una URL
     private Bitmap downloadImage(String urlString) {
         Bitmap bitmap = null;
         try {
@@ -112,5 +175,44 @@ public class EditUserActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return bitmap;
+    }
+    // Manejo de resultados de las actividades (cámara y galería)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // Captura de la cámara
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                imgPhoto.setImageBitmap(imageBitmap);
+            } else if (requestCode == REQUEST_IMAGE_GALLERY) {
+                // Selección de la galería
+                Uri selectedImage = data.getData();
+                try {
+                    InputStream imageStream = getContentResolver().openInputStream(selectedImage);
+                    Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
+                    imgPhoto.setImageBitmap(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    // Manejo de la respuesta a la solicitud de permisos
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso concedido, se inicia la cámara
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+            } else {
+                Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
