@@ -177,6 +177,7 @@ public class DBManager {
     }
 
     // Método que busca un usuario por su ID y, si no existe, lo crea utilizando la información de FirebaseUser.
+// Además, desencripta el teléfono y la dirección.
     public static User getOrCreateUser(Context context, FirebaseUser firebaseUser) {
         SQLiteDatabase db = dBhelper.getReadableDatabase();
         User user = null;
@@ -190,8 +191,34 @@ public class DBManager {
                 user.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
                 user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow("email")));
                 user.setImage(cursor.getBlob(cursor.getColumnIndexOrThrow("image"))); // BLOB
-                user.setAddress(cursor.getString(cursor.getColumnIndexOrThrow("address")));
-                user.setPhone(cursor.getString(cursor.getColumnIndexOrThrow("phone")));
+
+                // Desencriptar address
+                String encryptedAddress = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                if (encryptedAddress != null && !encryptedAddress.isEmpty()) {
+                    try {
+                        String decryptedAddress = KeystoreManager.decrypt(encryptedAddress);
+                        user.setAddress(decryptedAddress);
+                    } catch (Exception e) {
+                        Log.e("DBManager", "Error desencriptando address: " + e.getMessage(), e);
+                        user.setAddress("");
+                    }
+                } else {
+                    user.setAddress("");
+                }
+
+                // Desencriptar phone
+                String encryptedPhone = cursor.getString(cursor.getColumnIndexOrThrow("phone"));
+                if (encryptedPhone != null && !encryptedPhone.isEmpty()) {
+                    try {
+                        String decryptedPhone = KeystoreManager.decrypt(encryptedPhone);
+                        user.setPhone(decryptedPhone);
+                    } catch (Exception e) {
+                        Log.e("DBManager", "Error desencriptando phone: " + e.getMessage(), e);
+                        user.setPhone("");
+                    }
+                } else {
+                    user.setPhone("");
+                }
             }
         } catch (Exception e) {
             Log.e("DBManager", "Error al buscar usuario: " + e.getMessage(), e);
@@ -201,7 +228,7 @@ public class DBManager {
             }
         }
         if (user == null) {
-            // Si no existe, se crea un usuario con la información de FirebaseUser.
+            // Si el usuario no existe, se crea con la información de FirebaseUser.
             user = new User();
             user.setUser_id(firebaseUser.getUid());
             user.setName(firebaseUser.getDisplayName());
@@ -235,10 +262,10 @@ public class DBManager {
     // Método auxiliar para convertir un Bitmap a un arreglo de bytes (BLOB)
     private static byte[] convertBitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        // Se utiliza PNG con calidad 100; puedes ajustar según tus necesidades
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+
 
 
 
