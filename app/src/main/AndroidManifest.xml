@@ -16,6 +16,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
 
     <application
@@ -28,6 +31,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.victoria_delpinodepaz_IMDBAPPV2_0"
         tools:targetApi="31">
+        <activity
+            android:name=".SelectAddressActivity"
+            android:exported="false" />
         <activity
             android:name=".EditUserActivity"
             android:exported="false" />

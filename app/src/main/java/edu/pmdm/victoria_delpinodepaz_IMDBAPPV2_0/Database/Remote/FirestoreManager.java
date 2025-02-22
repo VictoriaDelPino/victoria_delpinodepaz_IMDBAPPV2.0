@@ -1,6 +1,11 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -8,7 +13,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,6 +113,49 @@ public class FirestoreManager {
             }
         } );
     }
+
+    public static void updateUser(String userId, String name, String address, String phone, ImageView imgPhoto, Context context, EmptyCallback callback) {
+        FirebaseFirestore db = getInstace();
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child(userId + ".jpg");
+
+        // Obtener el Bitmap de imgPhoto
+        imgPhoto.setDrawingCacheEnabled(true);
+        imgPhoto.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) imgPhoto.getDrawable()).getBitmap();
+
+        // Convertir Bitmap a byte[]
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageData = baos.toByteArray();
+
+        // Subir imagen a Firebase Storage
+        storageRef.putBytes(imageData)
+                .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl()
+                        .addOnSuccessListener(uri -> {
+                            String imageUrl = uri.toString();
+                            updateUserData(db, userId, name, address, phone, imageUrl, callback);
+                        })
+                        .addOnFailureListener(e -> callback.onResult(false)))
+                .addOnFailureListener(e -> callback.onResult(false));
+    }
+
+
+    private static void updateUserData(FirebaseFirestore db, String userId, String name, String address, String phone, String imageUrl, EmptyCallback callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("address", address);
+        updates.put("phone", phone);
+        if (imageUrl != null) {
+            updates.put("image", imageUrl);
+        }
+
+        db.collection("users").document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> callback.onResult(true))
+                .addOnFailureListener(e -> callback.onResult(false));
+    }
+
+
 
     public static void addFavorite(Movie favorite, EmptyCallback callback){
         FirebaseFirestore bd= getInstace();

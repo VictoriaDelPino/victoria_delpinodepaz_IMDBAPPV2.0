@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -35,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.PhoneCode;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class EditUserActivity extends AppCompatActivity {
@@ -50,6 +54,18 @@ public class EditUserActivity extends AppCompatActivity {
     private Spinner spinnerPhoneCodes;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_GALLERY = 2;
+    private Uri selectedImage;
+
+    private final ActivityResultLauncher<Intent> addressLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String address = result.getData().getStringExtra("selected_address");
+                    if (address != null) {
+                        eTxtAddress.setText(address);
+                    }
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +85,8 @@ public class EditUserActivity extends AppCompatActivity {
         eTxtPhone=findViewById(R.id.eTxtPhoneEditUser);
         imgPhoto=findViewById(R.id.imgPhotoEditUser);
         btnPhoto=findViewById(R.id.btnPhotoEdit);
+        btnAddress=findViewById(R.id.btnAddress);
+        btnSave=findViewById(R.id.btnSave);
 
         eTxtName.setText(AppPersistance.user.getName());
         eTxtEmail.setText(AppPersistance.user.getEmail());
@@ -133,6 +151,28 @@ public class EditUserActivity extends AppCompatActivity {
                     })
                     .show();
         });
+
+        btnAddress.setOnClickListener(v->{
+            Intent intent = new Intent(EditUserActivity.this, SelectAddressActivity.class);
+            addressLauncher.launch(intent);
+        });
+
+        btnSave.setOnClickListener(v -> {
+            FirestoreManager.updateUser(AppPersistance.user.getUser_id(),
+                    eTxtName.getText().toString(),
+                    eTxtAddress.getText().toString(),
+                    eTxtPhone.getText().toString(),
+                    imgPhoto, // Ahora pasamos la imagen desde ImageView
+                    this,
+                    success -> {
+                        if (success) {
+                            Log.d("UpdateUser", "Usuario actualizado correctamente");
+                        } else {
+                            Log.e("UpdateUser", "Error al actualizar el usuario");
+                        }
+                    });
+        });
+
     }
 
     // Muestra un diálogo para introducir la URL de la imagen
@@ -188,7 +228,8 @@ public class EditUserActivity extends AppCompatActivity {
                 imgPhoto.setImageBitmap(imageBitmap);
             } else if (requestCode == REQUEST_IMAGE_GALLERY) {
                 // Selección de la galería
-                Uri selectedImage = data.getData();
+
+                selectedImage = data.getData();
                 try {
                     InputStream imageStream = getContentResolver().openInputStream(selectedImage);
                     Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
