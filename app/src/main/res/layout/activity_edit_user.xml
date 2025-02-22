@@ -66,11 +66,15 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spinnerPhone"
+        <com.hbb20.CountryCodePicker
+            android:id="@+id/ccp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            app:ccp_defaultNameCode="ES"
+            app:ccp_autoDetectCountry="false"
+            app:ccp_showNameCode="true"
+            app:ccp_showFlag="true"/>
+
 
         <EditText
             android:id="@+id/eTxtPhoneEditUser"
@@ -79,7 +83,7 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="Telefono"
-            android:inputType="text" />
+            android:inputType="phone" />
 
     </LinearLayout>
 

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -30,7 +31,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.gson.Gson;
+import com.hbb20.CountryCodePicker;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.PhoneCode;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
@@ -59,6 +63,9 @@ public class EditUserActivity extends AppCompatActivity {
     private Uri selectedImage;
     private String selectedPlaceName;
     private LatLng selectedLatlng;
+    private String phoneNumber;
+    private CountryCodePicker ccp;
+    private static final int REQUEST_LOCATION_PERMISSION = 1001;
 
     private final ActivityResultLauncher<Intent> addressLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -91,50 +98,28 @@ public class EditUserActivity extends AppCompatActivity {
         });
 
 
-        eTxtName=findViewById(R.id.eTxtNameEditUser);
-        eTxtEmail=findViewById(R.id.eTxtEmailEdit);
-        eTxtAddress=findViewById(R.id.eTxtAddressEditUser);
-        eTxtPhone=findViewById(R.id.eTxtPhoneEditUser);
-        imgPhoto=findViewById(R.id.imgPhotoEditUser);
-        btnPhoto=findViewById(R.id.btnPhotoEdit);
-        btnAddress=findViewById(R.id.btnAddress);
-        btnSave=findViewById(R.id.btnSave);
+        eTxtName = findViewById(R.id.eTxtNameEditUser);
+        eTxtEmail = findViewById(R.id.eTxtEmailEdit);
+        eTxtAddress = findViewById(R.id.eTxtAddressEditUser);
+        eTxtPhone = findViewById(R.id.eTxtPhoneEditUser);
+        imgPhoto = findViewById(R.id.imgPhotoEditUser);
+        btnPhoto = findViewById(R.id.btnPhotoEdit);
+        btnAddress = findViewById(R.id.btnAddress);
+        btnSave = findViewById(R.id.btnSave);
+        ccp=findViewById(R.id.ccp);
 
         eTxtName.setText(AppPersistance.user.getName());
         eTxtEmail.setText(AppPersistance.user.getEmail());
         eTxtAddress.setText(AppPersistance.user.getAddress());
         eTxtPhone.setText(AppPersistance.user.getPhone());
-        new Thread(() -> {
-            Bitmap bitmap = downloadImage(AppPersistance.user.getImage());
-            runOnUiThread(() -> {
-                if (bitmap != null) {
-                    imgPhoto.setImageBitmap(bitmap);
-                } else {
-                    imgPhoto.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
-                }
-            });
-        }).start();
-
-        InputStream inputStream = getResources().openRawResource(R.raw.phone_codes);
-        InputStreamReader reader = new InputStreamReader(inputStream);
-        Gson gson = new Gson();
-        PhoneCode[] phoneCodesArray = gson.fromJson(reader, PhoneCode[].class);
-        List<PhoneCode> phoneCodesList = Arrays.asList(phoneCodesArray);
-        Spinner spinnerPhoneCodes = findViewById(R.id.spinnerPhone);
-        PhoneCodeAdapter adapter = new PhoneCodeAdapter(this, phoneCodesList);
-        spinnerPhoneCodes.setAdapter(adapter);
-// Suponiendo que 'phoneCodesList' es la lista de PhoneCode
-        int defaultIndex = 0;
-        for (int i = 0; i < phoneCodesList.size(); i++) {
-            // Puedes comparar por nombre o por código ISO, según prefieras
-            if (phoneCodesList.get(i).getName().equalsIgnoreCase("España")) {
-                defaultIndex = i;
-                break;
-            }
+        // Mostrar la imagen almacenada (convertir byte[] a Bitmap)
+        if (AppPersistance.user.getImage() != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(AppPersistance.user.getImage(), 0, AppPersistance.user.getImage().length);
+            imgPhoto.setImageBitmap(bitmap);
+        } else {
+            imgPhoto.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
         }
 
-// Asigna la selección por defecto en el Spinner
-        spinnerPhoneCodes.setSelection(defaultIndex);
 
 
         // Configura el botón para seleccionar imagen
@@ -164,31 +149,64 @@ public class EditUserActivity extends AppCompatActivity {
                     .show();
         });
 
-        btnAddress.setOnClickListener(v->{
-            Intent intent = new Intent(EditUserActivity.this, SelectAddressActivity.class);
-            addressLauncher.launch(intent);
+        btnAddress.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+            } else {
+                openAddressSelector();
+            }
         });
 
+        ccp.registerCarrierNumberEditText(eTxtPhone);
+
         btnSave.setOnClickListener(v -> {
-           /* FirestoreManager.updateUser(
-                    AppPersistance.user.getUser_id(),
-                    eTxtName.getText().toString(),
-                    eTxtAddress.getText().toString(),
-                    eTxtPhone.getText().toString(),
-                    success -> {
-                        if (success) {
-                            Log.d("UpdateUser", "Usuario actualizado correctamente");
-                        } else {
-                            Log.e("UpdateUser", "Error al actualizar el usuario");
-                        }
-                    }
-            );*/
+            String newName = eTxtName.getText().toString().trim();
+            String newEmail = eTxtEmail.getText().toString().trim();
+            String newPhone = eTxtPhone.getText().toString().trim();
+            String newAddress = eTxtAddress.getText().toString().trim();
+
+            if (!newPhone.matches("^\\d{9,15}$")) {
+                Toast.makeText(this, "El número debe tener entre 9 y 15 dígitos.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Actualizar el objeto usuario en AppPersistance
+            AppPersistance.user.setName(newName);
+            AppPersistance.user.setEmail(newEmail);
+            AppPersistance.user.setPhone(newPhone);
+            AppPersistance.user.setAddress(newAddress);
+
+            // Actualizar la imagen: convertir el contenido de imgPhoto a byte[]
+            imgPhoto.buildDrawingCache();
+            Bitmap bitmap = imgPhoto.getDrawingCache();
+            if (bitmap != null) {
+                AppPersistance.user.setImage(convertBitmapToByteArray(bitmap));
+            }
+
+            // Actualizar usuario en la base de datos
+            DBManager.updateUser(EditUserActivity.this);
         });
+
 
 
     }
+    private byte[] convertBitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // Ajusta el formato y la calidad según necesites (PNG, 100% calidad)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
 
-    // Muestra un diálogo para introducir la URL de la imagen
+/**
+ * Método para validar el formato del número de teléfono.
+ * Acepta entre 9 y 15 dígitos sin espacios ni caracteres especiales.
+ */
+        private boolean isValidPhoneNumber(String phoneNumber) {
+            return phoneNumber.matches("^\\d{9,15}$");
+        }
+
+
+        // Muestra un diálogo para introducir la URL de la imagen
     private void showUrlInputDialog() {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
@@ -229,6 +247,13 @@ public class EditUserActivity extends AppCompatActivity {
         }
         return bitmap;
     }
+
+    private void openAddressSelector() {
+        Intent intent = new Intent(EditUserActivity.this, SelectAddressActivity.class);
+        addressLauncher.launch(intent);
+    }
+
+
     // Manejo de resultados de las actividades (cámara y galería)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -266,6 +291,13 @@ public class EditUserActivity extends AppCompatActivity {
                 startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
             } else {
                 Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openAddressSelector();
+            } else {
+                Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show();
             }
         }
     }

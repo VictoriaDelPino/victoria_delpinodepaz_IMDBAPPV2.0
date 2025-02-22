@@ -88,21 +88,21 @@ public class MainActivity extends AppCompatActivity {
         imgUserPhoto = headerView.findViewById(R.id.imgUserPhoto);
 
         // Si hay un usuario autenticado, muestra su información
-        if(AppPersistance.user!=null) {
+        // Si hay un usuario autenticado, muestra su información
+        if(AppPersistance.user != null) {
             txtEmail.setText(AppPersistance.user.getEmail());
             txtUserName.setText(AppPersistance.user.getName());
-            // Descarga y establece la imagen del usuario de forma asíncrona
-            new Thread(() -> {
-                Bitmap bitmap = downloadImage(AppPersistance.user.getImage());
-                runOnUiThread(() -> {
-                    if (bitmap != null) {
-                        imgUserPhoto.setImageBitmap(bitmap);
-                    } else {
-                        imgUserPhoto.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
-                    }
-                });
-            }).start();
+
+            // Verifica si se ha almacenado una imagen (BLOB)
+            if(AppPersistance.user.getImage() != null) {
+                // Convierte el arreglo de bytes a Bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(AppPersistance.user.getImage(), 0, AppPersistance.user.getImage().length);
+                imgUserPhoto.setImageBitmap(bitmap);
+            } else {
+                imgUserPhoto.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
+            }
         }
+
 
         // Configura el botón de cierre de sesión
         btnLogOut.setOnClickListener(new View.OnClickListener() {

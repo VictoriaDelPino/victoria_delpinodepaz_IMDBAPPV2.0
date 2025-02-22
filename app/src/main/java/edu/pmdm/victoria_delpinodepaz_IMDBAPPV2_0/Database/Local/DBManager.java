@@ -4,14 +4,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.KeystoreManager.KeystoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.SearchResultActivity;
@@ -115,8 +124,8 @@ public class DBManager {
             Toast.makeText(context, "Error al eliminar la película", Toast.LENGTH_SHORT).show();
         }
     }
-    public static void addUser(Context context) {
-        User user= AppPersistance.user;
+    public static void addUser(Context context, User user) {
+
 
         SQLiteDatabase db = dBhelper.getWritableDatabase();
 
@@ -141,6 +150,94 @@ public class DBManager {
             Log.e("Error", "Error al insertar usuario: " + e.getMessage(), e);
             Toast.makeText(context, "Error al agregar usuario", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Método para actualizar el usuario en la tabla "users"
+    public static void updateUser(Context context) {
+        User user= AppPersistance.user;
+        SQLiteDatabase db = dBhelper.getWritableDatabase();
+        try {
+            // Encriptar teléfono y dirección
+            String encryptedPhone = KeystoreManager.encrypt(user.getPhone());
+            String encryptedAddress = KeystoreManager.encrypt(user.getAddress());
+
+            String SQL = "UPDATE users SET name = ?, image = ?, phone = ?, address = ? WHERE user_id = ?";
+            db.execSQL(SQL, new Object[]{
+                    user.getName(),
+                    user.getImage(),  // Ahora image es un byte[] (BLOB)
+                    encryptedPhone,
+                    encryptedAddress,
+                    user.getUser_id()
+            });
+            Toast.makeText(context, "Usuario actualizado correctamente", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e("Database_", "Error al actualizar usuario: " + e.getMessage(), e);
+            Toast.makeText(context, "Error al actualizar usuario", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Método que busca un usuario por su ID y, si no existe, lo crea utilizando la información de FirebaseUser.
+    public static User getOrCreateUser(Context context, FirebaseUser firebaseUser) {
+        SQLiteDatabase db = dBhelper.getReadableDatabase();
+        User user = null;
+        Cursor cursor = null;
+        try {
+            String query = "SELECT * FROM users WHERE user_id = ?";
+            cursor = db.rawQuery(query, new String[]{firebaseUser.getUid()});
+            if (cursor.moveToFirst()) {
+                user = new User();
+                user.setUser_id(cursor.getString(cursor.getColumnIndexOrThrow("user_id")));
+                user.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow("email")));
+                user.setImage(cursor.getBlob(cursor.getColumnIndexOrThrow("image"))); // BLOB
+                user.setAddress(cursor.getString(cursor.getColumnIndexOrThrow("address")));
+                user.setPhone(cursor.getString(cursor.getColumnIndexOrThrow("phone")));
+            }
+        } catch (Exception e) {
+            Log.e("DBManager", "Error al buscar usuario: " + e.getMessage(), e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        if (user == null) {
+            // Si no existe, se crea un usuario con la información de FirebaseUser.
+            user = new User();
+            user.setUser_id(firebaseUser.getUid());
+            user.setName(firebaseUser.getDisplayName());
+            user.setEmail(firebaseUser.getEmail());
+            // Convertir la foto (si existe) de URL a BLOB (byte[])
+            if (firebaseUser.getPhotoUrl() != null) {
+                try {
+                    URL url = new URL(firebaseUser.getPhotoUrl().toString());
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(input);
+                    byte[] imageBytes = convertBitmapToByteArray(bitmap);
+                    user.setImage(imageBytes);
+                } catch (Exception e) {
+                    Log.e("DBManager", "Error al descargar la imagen: " + e.getMessage(), e);
+                    user.setImage(null);
+                }
+            } else {
+                user.setImage(null);
+            }
+            // Valores por defecto para address y phone
+            user.setAddress("");
+            user.setPhone("");
+            addUser(context, user);
+        }
+        return user;
+    }
+
+    // Método auxiliar para convertir un Bitmap a un arreglo de bytes (BLOB)
+    private static byte[] convertBitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // Se utiliza PNG con calidad 100; puedes ajustar según tus necesidades
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 
 

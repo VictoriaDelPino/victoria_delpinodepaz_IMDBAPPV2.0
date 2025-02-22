@@ -103,13 +103,16 @@ public class FirestoreManager {
                 }else{
                     DocumentSnapshot doc=documents.getDocuments().get(0);
                     String user_id=doc.get("user_id").toString();
-                    String phone= doc.get("phone").toString();
+                    //String phone= doc.get("phone").toString();
                     String name= doc.get("name").toString();
-                    String image=doc.get("image").toString();
+                    //String image=doc.get("image").toString();
                     String emailGot=doc.get("email").toString();
-                    String address= doc.get("address").toString();
+                    //String address= doc.get("address").toString();
                     //Añadir activity_log
-                    User user= new User(new ArrayList<>(),address,emailGot,image,name, phone,user_id);
+                    User user= new User();
+                    user.setUser_id(user_id);
+                    user.setName(name);
+                    user.setEmail(emailGot);
                     callback.onResult(user);
                 }
             }

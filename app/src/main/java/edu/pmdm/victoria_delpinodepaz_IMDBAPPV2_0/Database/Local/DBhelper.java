@@ -10,7 +10,7 @@ public class DBhelper extends SQLiteOpenHelper {
      // Nombre del archivo de la base de datos
     private static final String DATABASE_NAME = "favoriteMovies.db";
      // Versión de la base de datos
-     private static final int DATABASE_VERSION = 2;
+     private static final int DATABASE_VERSION = 3;
      // Instancia única de DBhelper (patrón Singleton)
      private static DBhelper instance;
 
@@ -30,7 +30,7 @@ public class DBhelper extends SQLiteOpenHelper {
                      "user_id TEXT PRIMARY KEY, " +
                      "name TEXT, " +
                      "email TEXT, " +
-                     "image TEXT, " +
+                     "image BLOB, " +         // Se usa BLOB para guardar la imagen completa
                      "address TEXT, " +
                      "phone TEXT, " +
                      "last_login TEXT, " +
