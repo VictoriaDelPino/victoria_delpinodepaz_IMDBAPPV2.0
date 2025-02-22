@@ -27,6 +27,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
@@ -55,13 +57,23 @@ public class EditUserActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_GALLERY = 2;
     private Uri selectedImage;
+    private String selectedPlaceName;
+    private LatLng selectedLatlng;
 
     private final ActivityResultLauncher<Intent> addressLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    String address = result.getData().getStringExtra("selected_address");
-                    if (address != null) {
-                        eTxtAddress.setText(address);
+                    Boolean selected= result.getData().getBooleanExtra("selected_address",false);
+                    if(selected){
+                        String addressName=result.getData().getStringExtra("address_name");
+                        float addressLat=result.getData().getFloatExtra("address_lat",0f);
+                        float addressLng=result.getData().getFloatExtra("address_lng",0f);
+                        selectedPlaceName= addressName;
+                        selectedLatlng= new LatLng(addressLat,addressLng);
+                        eTxtAddress.setText(selectedPlaceName);
+
+                    }else{
+                        Toast.makeText(getApplicationContext(), "No se ha seleccionado ninguna ubicación",Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -158,20 +170,21 @@ public class EditUserActivity extends AppCompatActivity {
         });
 
         btnSave.setOnClickListener(v -> {
-            FirestoreManager.updateUser(AppPersistance.user.getUser_id(),
+           /* FirestoreManager.updateUser(
+                    AppPersistance.user.getUser_id(),
                     eTxtName.getText().toString(),
                     eTxtAddress.getText().toString(),
                     eTxtPhone.getText().toString(),
-                    imgPhoto, // Ahora pasamos la imagen desde ImageView
-                    this,
                     success -> {
                         if (success) {
                             Log.d("UpdateUser", "Usuario actualizado correctamente");
                         } else {
                             Log.e("UpdateUser", "Error al actualizar el usuario");
                         }
-                    });
+                    }
+            );*/
         });
+
 
     }
 

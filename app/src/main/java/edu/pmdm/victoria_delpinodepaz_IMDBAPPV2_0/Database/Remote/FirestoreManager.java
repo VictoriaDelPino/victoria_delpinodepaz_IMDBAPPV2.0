@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -17,6 +18,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,30 +116,54 @@ public class FirestoreManager {
         } );
     }
 
-    public static void updateUser(String userId, String name, String address, String phone, ImageView imgPhoto, Context context, EmptyCallback callback) {
+   /* public static void updateUser(String userId, String name, String address, String phone, Uri imgUri, Context context, EmptyCallback callback) {
         FirebaseFirestore db = getInstace();
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child(userId + ".jpg");
+       // db.collection("users").whereEqualTo("user_id", userId).get().addOnCompleteListener()
 
-        // Obtener el Bitmap de imgPhoto
-        imgPhoto.setDrawingCacheEnabled(true);
-        imgPhoto.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) imgPhoto.getDrawable()).getBitmap();
+        try {
+            // Convertir URI en Bitmap
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imgUri);
 
-        // Convertir Bitmap a byte[]
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageData = baos.toByteArray();
+            // Verificar que el Bitmap no sea null
+            if (bitmap == null) {
+                Log.e("UpdateUser", "Error: Bitmap es NULL");
+                callback.onResult(false);
+                return;
+            }
 
-        // Subir imagen a Firebase Storage
-        storageRef.putBytes(imageData)
-                .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl()
-                        .addOnSuccessListener(uri -> {
-                            String imageUrl = uri.toString();
-                            updateUserData(db, userId, name, address, phone, imageUrl, callback);
-                        })
-                        .addOnFailureListener(e -> callback.onResult(false)))
-                .addOnFailureListener(e -> callback.onResult(false));
+            // Convertir Bitmap a byte[]
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageData = baos.toByteArray();
+
+            Log.d("UpdateUser", "Iniciando subida de imagen para el usuario: " + userId);
+
+            // Subir imagen a Firebase Storage
+            storageRef.putBytes(imageData)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d("UpdateUser", "Imagen subida exitosamente.");
+                        storageRef.getDownloadUrl()
+                                .addOnSuccessListener(uri -> {
+                                    String imageUrl = uri.toString();
+                                    Log.d("UpdateUser", "URL de descarga obtenida: " + imageUrl);
+                                    updateUserData(db, userId, name, address, phone, imageUrl, callback);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("UpdateUser", "Error al obtener URL de descarga", e);
+                                    callback.onResult(false);
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("UpdateUser", "Error al subir la imagen", e);
+                        callback.onResult(false);
+                    });
+        } catch (IOException e) {
+            Log.e("UpdateUser", "Error al convertir URI a Bitmap", e);
+            callback.onResult(false);
+        }
     }
+
+
 
 
     private static void updateUserData(FirebaseFirestore db, String userId, String name, String address, String phone, String imageUrl, EmptyCallback callback) {
@@ -153,7 +179,7 @@ public class FirestoreManager {
                 .update(updates)
                 .addOnSuccessListener(aVoid -> callback.onResult(true))
                 .addOnFailureListener(e -> callback.onResult(false));
-    }
+    }*/
 
 
 
