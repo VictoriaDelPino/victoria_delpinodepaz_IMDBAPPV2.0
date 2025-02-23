@@ -81,4 +81,6 @@ public class LauncherActivity extends AppCompatActivity {
         },1500);
 
     }
+
+
 }

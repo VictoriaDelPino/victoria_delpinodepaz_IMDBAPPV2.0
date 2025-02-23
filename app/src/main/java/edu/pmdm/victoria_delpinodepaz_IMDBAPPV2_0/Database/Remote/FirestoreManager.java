@@ -59,11 +59,6 @@ public class FirestoreManager {
                         if(currentUser.getDisplayName()!=null)  data.put("name", currentUser.getDisplayName());
                         else data.put("name", "");
                         data.put("user_id", "");
-                        data.put("address","");
-                        if( currentUser.getPhoneNumber()!= null) data.put("phone", currentUser.getPhoneNumber());
-                        else data.put("phone", "");
-                        if(currentUser.getPhotoUrl()!=null) data.put("image", currentUser.getPhotoUrl().toString());
-                        else data.put("image", "");
                         data.put("activity_log","");
                         db.collection("users").add(data)
                                 .addOnSuccessListener(documentReference -> {
@@ -103,12 +98,8 @@ public class FirestoreManager {
                 }else{
                     DocumentSnapshot doc=documents.getDocuments().get(0);
                     String user_id=doc.get("user_id").toString();
-                    //String phone= doc.get("phone").toString();
                     String name= doc.get("name").toString();
-                    //String image=doc.get("image").toString();
                     String emailGot=doc.get("email").toString();
-                    //String address= doc.get("address").toString();
-                    //Añadir activity_log
                     User user= new User();
                     user.setUser_id(user_id);
                     user.setName(name);

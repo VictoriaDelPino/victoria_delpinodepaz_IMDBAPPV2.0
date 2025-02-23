@@ -41,6 +41,7 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirebaseAuthManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 
 //Actividad encargada de gestionar el proceso de inicio de sesión con Google mediante Firebase.
 public class LoginActivity extends AppCompatActivity {
@@ -235,6 +236,8 @@ public class LoginActivity extends AppCompatActivity {
                     if (resultUser != null) {
                         AppPersistance.user = DBManager.getOrCreateUser(this,user, resultUser.getUser_id());
                         Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+                        SessionManager.setDateLogin();
+                        Log.d("CICLO_Vida","sessionToken - INICIO" );
                         Intent intent = new Intent(this, MainActivity.class);
                         startActivity(intent);
                         finishAffinity();
@@ -266,4 +269,6 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, "Usuario no autenticado");
         }
     }
+
+
 }

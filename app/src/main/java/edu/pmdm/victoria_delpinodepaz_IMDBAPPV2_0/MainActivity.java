@@ -30,9 +30,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBSync;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
 
 //lase principal de la aplicación que gestiona la navegación y muestra la interfaz principal.
@@ -109,11 +111,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, getString(R.string.session_closed), Toast.LENGTH_SHORT).show();
-                FirebaseAuth.getInstance().signOut();
-                LoginManager.getInstance().logOut();
+                SessionManager.setDateLogout();
+                SessionManager.saveSession(new EmptyCallback() {
+                    @Override
+                    public void onResult(Boolean b) {
+                        if(b){
+                            Log.d("CICLO_Vida","sessionToken - FINAL" );
+                            FirebaseAuth.getInstance().signOut();
+                            LoginManager.getInstance().logOut();
+                            restartApp();
+                        }else {
+                            Toast.makeText(getApplicationContext(), "Fallo en la base de datos",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
                // startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 //finish();
-                restartApp();
+
             }
         });
     }
@@ -199,5 +214,20 @@ public class MainActivity extends AppCompatActivity {
         } else {
             imgUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        SessionManager.setDateLogout();
+        SessionManager.saveSession(new EmptyCallback() {
+            @Override
+            public void onResult(Boolean b) {
+                Log.d("CICLO_Vida","sessionToken - FINAL" );
+                finishAffinity();
+                System.exit(0);
+            }
+    });
+
     }
 }
