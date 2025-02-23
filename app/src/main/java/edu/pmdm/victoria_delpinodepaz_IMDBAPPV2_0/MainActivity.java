@@ -182,4 +182,22 @@ public class MainActivity extends AppCompatActivity {
         DBSync.syncFavoritesWithSQLite(MainActivity.this);
         DBSync.syncFavoritesWithFirestore();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        TextView txtUserName = headerView.findViewById(R.id.txtUserName);
+        ImageView imgUserPhoto = headerView.findViewById(R.id.imgUserPhoto);
+
+        txtUserName.setText(AppPersistance.user.getName());
+        // Convertir byte[] a Bitmap para mostrar la imagen:
+        if (AppPersistance.user.getImage() != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(AppPersistance.user.getImage(), 0, AppPersistance.user.getImage().length);
+            imgUserPhoto.setImageBitmap(bitmap);
+        } else {
+            imgUserPhoto.setImageResource(R.drawable.ic_launcher_foreground);
+        }
+    }
 }

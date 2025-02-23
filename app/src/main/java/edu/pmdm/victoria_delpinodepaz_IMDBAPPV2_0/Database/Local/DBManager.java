@@ -178,13 +178,13 @@ public class DBManager {
 
     // Método que busca un usuario por su ID y, si no existe, lo crea utilizando la información de FirebaseUser.
 // Además, desencripta el teléfono y la dirección.
-    public static User getOrCreateUser(Context context, FirebaseUser firebaseUser) {
+    public static User getOrCreateUser(Context context, FirebaseUser firebaseUser, String user_id) {
         SQLiteDatabase db = dBhelper.getReadableDatabase();
         User user = null;
         Cursor cursor = null;
         try {
             String query = "SELECT * FROM users WHERE user_id = ?";
-            cursor = db.rawQuery(query, new String[]{firebaseUser.getUid()});
+            cursor = db.rawQuery(query, new String[]{user_id});
             if (cursor.moveToFirst()) {
                 user = new User();
                 user.setUser_id(cursor.getString(cursor.getColumnIndexOrThrow("user_id")));
@@ -230,22 +230,40 @@ public class DBManager {
         if (user == null) {
             // Si el usuario no existe, se crea con la información de FirebaseUser.
             user = new User();
-            user.setUser_id(firebaseUser.getUid());
+            user.setUser_id(user_id);
             user.setName(firebaseUser.getDisplayName());
             user.setEmail(firebaseUser.getEmail());
             // Convertir la foto (si existe) de URL a BLOB (byte[])
             if (firebaseUser.getPhotoUrl() != null) {
                 try {
-                    URL url = new URL(firebaseUser.getPhotoUrl().toString());
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setDoInput(true);
-                    connection.connect();
-                    InputStream input = connection.getInputStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(input);
-                    byte[] imageBytes = convertBitmapToByteArray(bitmap);
-                    user.setImage(imageBytes);
+                    User finalUser = user;
+                    Thread downloadThread = new Thread(() -> {
+                        try {
+                            URL url = new URL(firebaseUser.getPhotoUrl().toString());
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setDoInput(true);
+                            connection.setConnectTimeout(5000);
+                            connection.setReadTimeout(5000);
+                            connection.connect();
+                            InputStream input = connection.getInputStream();
+                            Bitmap bitmap = BitmapFactory.decodeStream(input);
+                            if (bitmap != null) {
+                                byte[] imageBytes = convertBitmapToByteArray(bitmap);
+                                finalUser.setImage(imageBytes);
+                                Log.d("DBManager", "Imagen descargada y convertida correctamente.");
+                            } else {
+                                Log.e("DBManager", "Bitmap nulo tras decodificar el stream.");
+                                finalUser.setImage(null);
+                            }
+                        } catch (Exception e) {
+                            Log.e("DBManager", "Error al descargar la imagen en hilo: " + e.getMessage(), e);
+                            finalUser.setImage(null);
+                        }
+                    });
+                    downloadThread.start();
+                    downloadThread.join(); // Espera a que finalice la descarga
                 } catch (Exception e) {
-                    Log.e("DBManager", "Error al descargar la imagen: " + e.getMessage(), e);
+                    Log.e("DBManager", "Error al ejecutar hilo para descargar imagen: " + e.getMessage(), e);
                     user.setImage(null);
                 }
             } else {
@@ -265,7 +283,6 @@ public class DBManager {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
-
 
 
 

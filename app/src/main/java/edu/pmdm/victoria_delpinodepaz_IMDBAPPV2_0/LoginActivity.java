@@ -233,7 +233,7 @@ public class LoginActivity extends AppCompatActivity {
         if (user != null) {
                 FirestoreManager.getUser(user.getEmail(), resultUser ->{
                     if (resultUser != null) {
-                        AppPersistance.user = DBManager.getOrCreateUser(this,user);
+                        AppPersistance.user = DBManager.getOrCreateUser(this,user, resultUser.getUser_id());
                         Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                         Intent intent = new Intent(this, MainActivity.class);
                         startActivity(intent);
@@ -245,7 +245,7 @@ public class LoginActivity extends AppCompatActivity {
                                 if (user  != null) {
                                     FirestoreManager.getUser(user.getEmail(),resultNewUser ->{
                                         if (resultNewUser != null) {
-                                            AppPersistance.user = DBManager.getOrCreateUser(this,user);
+                                            AppPersistance.user = DBManager.getOrCreateUser(this,user,resultUser.getUser_id());
                                             Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                                             Intent intent = new Intent(this, MainActivity.class);
                                             startActivity(intent);

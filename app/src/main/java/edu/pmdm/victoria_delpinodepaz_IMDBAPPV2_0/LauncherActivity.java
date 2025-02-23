@@ -61,7 +61,7 @@ public class LauncherActivity extends AppCompatActivity {
                 if (fbUser != null) {
                         FirestoreManager.getUser(fbUser.getEmail(),resultUser ->{
                             if (resultUser != null) {
-                                AppPersistance.user = DBManager.getOrCreateUser( context,  fbUser);
+                                AppPersistance.user = DBManager.getOrCreateUser( context,  fbUser, resultUser.getUser_id());
                                 Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                                 Intent intent = new Intent(context, MainActivity.class);
                                 startActivity(intent);
