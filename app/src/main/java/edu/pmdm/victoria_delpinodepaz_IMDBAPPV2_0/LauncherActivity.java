@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseUser;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -61,6 +62,7 @@ public class LauncherActivity extends AppCompatActivity {
                 if (fbUser != null) {
                         FirestoreManager.getUser(fbUser.getEmail(),resultUser ->{
                             if (resultUser != null) {
+
                                 AppPersistance.user = DBManager.getOrCreateUser( context,  fbUser, resultUser.getUser_id());
                                 Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                                 Intent intent = new Intent(context, MainActivity.class);

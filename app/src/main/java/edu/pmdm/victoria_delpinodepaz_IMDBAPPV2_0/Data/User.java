@@ -5,10 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
 
 public class User implements Parcelable {
     private String user_id;
@@ -16,11 +13,13 @@ public class User implements Parcelable {
     private byte[] image; // Se almacena la imagen como BLOB
     private String email;
     private String address;
-    private ArrayList<Activity_log> activityLogs;
+    private String login;
+    private String logout;
     private String phone;
 
-    public User(ArrayList<Activity_log> activityLogs, String address, String email, byte[] image, String name, String phone, String user_id) {
-        this.activityLogs = activityLogs;
+    public User(String login, String logout, String address, String email, byte[] image, String name, String phone, String user_id) {
+        this.login = login;
+        this.logout = logout;
         this.address = address;
         this.email = email;
         this.image = image;
@@ -38,6 +37,8 @@ public class User implements Parcelable {
         email = in.readString();
         address = in.readString();
         phone = in.readString();
+        login = in.readString();
+        logout = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -88,11 +89,17 @@ public class User implements Parcelable {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-    public ArrayList<Activity_log> getActivityLogs() {
-        return activityLogs;
+    public String getLogin() {
+        return login;
     }
-    public void setActivityLogs(ArrayList<Activity_log> activityLogs) {
-        this.activityLogs = activityLogs;
+    public void setLogin(String login) {
+        this.login = login;
+    }
+    public String getLogout() {
+        return logout;
+    }
+    public void setLogout(String logout) {
+        this.logout = logout;
     }
 
     @Override
@@ -103,28 +110,31 @@ public class User implements Parcelable {
         parcel.writeString(email);
         parcel.writeString(address);
         parcel.writeString(phone);
+        parcel.writeString(login);
+        parcel.writeString(logout);
     }
     @Override
     public int describeContents() {
         return 0;
     }
 
-    // equals() y hashCode() se pueden generar según se necesite.
-
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(user_id, user.user_id) && Objects.equals(name, user.name) && Objects.equals(image, user.image) && Objects.equals(email, user.email) && Objects.equals(address, user.address) && Objects.equals(activityLogs, user.activityLogs) && Objects.equals(phone, user.phone);
+        return Objects.equals(user_id, user.user_id) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(image, user.image) &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(address, user.address) &&
+                Objects.equals(phone, user.phone) &&
+                Objects.equals(login, user.login) &&
+                Objects.equals(logout, user.logout);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user_id, name, image, email, address, activityLogs, phone);
+        return Objects.hash(user_id, name, image, email, address, phone, login, logout);
     }
-
-
 }

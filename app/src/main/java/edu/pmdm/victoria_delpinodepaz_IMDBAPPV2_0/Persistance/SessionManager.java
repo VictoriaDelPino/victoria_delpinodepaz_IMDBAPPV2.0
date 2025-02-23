@@ -1,6 +1,10 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance;
 
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 
 public class SessionManager {
@@ -32,10 +38,20 @@ public class SessionManager {
 
     public static void setDateLogin(){
         dateLogin=getActualDate();
+
     }
 
     public static void setDateLogout(){
         dateLogout=getActualDate();
+
+    }
+
+    public static String getDateLogin() {
+        return dateLogin;
+    }
+
+    public static String getDateLogout() {
+        return dateLogout;
     }
 
     public static void saveSession(EmptyCallback callback){
@@ -69,4 +85,6 @@ public class SessionManager {
            }
         });
     }
+
+
 }

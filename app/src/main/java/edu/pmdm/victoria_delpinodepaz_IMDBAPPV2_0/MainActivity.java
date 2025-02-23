@@ -29,10 +29,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBSync;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.App;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             Places.initialize(getApplicationContext(), "AIzaSyAER7D-uvYpBOG3wZjz9z3AeGulqAci-OU");
         }
 
+        SessionManager.setDateLogin();
+        DBManager.updateUserLogin(getApplicationContext());
 
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -112,11 +117,22 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, getString(R.string.session_closed), Toast.LENGTH_SHORT).show();
                 SessionManager.setDateLogout();
+                DBManager.updateUserLogout(getApplicationContext());
                 SessionManager.saveSession(new EmptyCallback() {
                     @Override
                     public void onResult(Boolean b) {
                         if(b){
                             Log.d("CICLO_Vida","sessionToken - FINAL" );
+                            AppPersistance.user.setUser_id("");
+                            AppPersistance.user.setName("");
+                            AppPersistance.user.setImage(new byte[0]);
+                            AppPersistance.user.setEmail("");
+                            AppPersistance.user.setAddress("");
+                            AppPersistance.user.setLogin("");
+                            AppPersistance.user.setLogout("");
+                            AppPersistance.user.setPhone("");
+
+
                             FirebaseAuth.getInstance().signOut();
                             LoginManager.getInstance().logOut();
                             restartApp();
@@ -220,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         SessionManager.setDateLogout();
+        DBManager.updateUserLogout(this);
         SessionManager.saveSession(new EmptyCallback() {
             @Override
             public void onResult(Boolean b) {

@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 
 
 public class App extends Application {
@@ -34,6 +35,7 @@ public class App extends Application {
                     FirebaseUser fbUser= FirebaseAuth.getInstance().getCurrentUser();
                     if(fbUser!=null){
                         SessionManager.setDateLogin();
+                        DBManager.updateUserLogin(getApplicationContext());
                         Log.d("CICLO_Vida","sessionToken - INICIO" );
                     }
 
@@ -57,6 +59,7 @@ public class App extends Application {
                 activityCount--;
                 if(activityCount==0){
                     SessionManager.setDateLogout();
+                    DBManager.updateUserLogout(getApplicationContext());
                     SessionManager.saveSession(new EmptyCallback() {
                         @Override
                         public void onResult(Boolean b) {

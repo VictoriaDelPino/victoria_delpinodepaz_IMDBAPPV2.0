@@ -180,11 +180,6 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
-
         // Asigna el botón de inicio de sesión y define su comportamiento
         Button signInButton = findViewById(R.id.signInButton);
         signInButton.setOnClickListener(v -> startSignIn());
@@ -236,7 +231,6 @@ public class LoginActivity extends AppCompatActivity {
                     if (resultUser != null) {
                         AppPersistance.user = DBManager.getOrCreateUser(this,user, resultUser.getUser_id());
                         Log.d("AppPersis",AppPersistance.user.getEmail().toString());
-                        SessionManager.setDateLogin();
                         Log.d("CICLO_Vida","sessionToken - INICIO" );
                         Intent intent = new Intent(this, MainActivity.class);
                         startActivity(intent);
@@ -248,7 +242,7 @@ public class LoginActivity extends AppCompatActivity {
                                 if (user  != null) {
                                     FirestoreManager.getUser(user.getEmail(),resultNewUser ->{
                                         if (resultNewUser != null) {
-                                            AppPersistance.user = DBManager.getOrCreateUser(this,user,resultUser.getUser_id());
+                                            AppPersistance.user = DBManager.getOrCreateUser(this,user,resultNewUser.getUser_id());
                                             Log.d("AppPersis",AppPersistance.user.getEmail().toString());
                                             Intent intent = new Intent(this, MainActivity.class);
                                             startActivity(intent);

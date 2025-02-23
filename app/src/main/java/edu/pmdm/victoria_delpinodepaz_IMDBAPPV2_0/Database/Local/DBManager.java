@@ -23,6 +23,7 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManag
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.KeystoreManager.KeystoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.SearchResultActivity;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
@@ -283,7 +284,32 @@ public class DBManager {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+    public static void updateUserLogin(Context context) {
 
+        User user = AppPersistance.user;
+        SQLiteDatabase db = dBhelper.getWritableDatabase();
+        try {
+            String SQL = "UPDATE users SET last_login = ? WHERE user_id = ?";
+            db.execSQL(SQL, new Object[]{SessionManager.getDateLogin(), user.getUser_id()});
+            Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
+            Toast.makeText(context, "Error al actualizar login", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static void updateUserLogout(Context context) {
+        User user = AppPersistance.user;
+        SQLiteDatabase db = dBhelper.getWritableDatabase();
+        try {
+            String SQL = "UPDATE users SET last_logout = ? WHERE user_id = ?";
+            db.execSQL(SQL, new Object[]{SessionManager.getDateLogout(), user.getUser_id()});
+            Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
+            Toast.makeText(context, "Error al actualizar login", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
 }
