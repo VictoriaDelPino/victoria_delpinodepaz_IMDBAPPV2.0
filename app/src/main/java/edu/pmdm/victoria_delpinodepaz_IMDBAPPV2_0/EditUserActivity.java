@@ -164,7 +164,7 @@ public class EditUserActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> {
             String newName = eTxtName.getText().toString().trim();
             String newEmail = eTxtEmail.getText().toString().trim();
-            String newPhone = eTxtPhone.getText().toString().replaceAll("\\s+", "");
+            String newPhone = eTxtPhone.getText().toString().replaceAll("[^\\d]", "");
             String newAddress = eTxtAddress.getText().toString().trim();
 
             if (!newPhone.matches("^\\d{9,15}$")) {
