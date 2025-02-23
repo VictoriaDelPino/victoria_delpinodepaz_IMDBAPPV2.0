@@ -36,6 +36,7 @@ import com.hbb20.CountryCodePicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -163,7 +164,7 @@ public class EditUserActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> {
             String newName = eTxtName.getText().toString().trim();
             String newEmail = eTxtEmail.getText().toString().trim();
-            String newPhone = eTxtPhone.getText().toString().trim();
+            String newPhone = eTxtPhone.getText().toString().replaceAll("\\s+", "");
             String newAddress = eTxtAddress.getText().toString().trim();
 
             if (!newPhone.matches("^\\d{9,15}$")) {
@@ -200,16 +201,7 @@ public class EditUserActivity extends AppCompatActivity {
         return stream.toByteArray();
     }
 
-/**
- * Método para validar el formato del número de teléfono.
- * Acepta entre 9 y 15 dígitos sin espacios ni caracteres especiales.
- */
-        private boolean isValidPhoneNumber(String phoneNumber) {
-            return phoneNumber.matches("^\\d{9,15}$");
-        }
-
-
-        // Muestra un diálogo para introducir la URL de la imagen
+    // Muestra un diálogo para introducir la URL de la imagen
     private void showUrlInputDialog() {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
@@ -272,10 +264,35 @@ public class EditUserActivity extends AppCompatActivity {
 
                 selectedImage = data.getData();
                 try {
+                    // Abrir el InputStream para obtener el bitmap
                     InputStream imageStream = getContentResolver().openInputStream(selectedImage);
                     Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
+                    imageStream.close();
+
+                    // Reabrir el InputStream para leer los metadatos EXIF
+                    InputStream exifStream = getContentResolver().openInputStream(selectedImage);
+                    androidx.exifinterface.media.ExifInterface exif = new androidx.exifinterface.media.ExifInterface(exifStream);
+                    exifStream.close();
+
+                    int orientation = exif.getAttributeInt(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                            androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL);
+                    int rotation = 0;
+                    if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90) {
+                        rotation = 90;
+                    } else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180) {
+                        rotation = 180;
+                    } else if (orientation == androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270) {
+                        rotation = 270;
+                    }
+
+                    if (rotation != 0) {
+                        android.graphics.Matrix matrix = new android.graphics.Matrix();
+                        matrix.postRotate(rotation);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    }
+
                     imgPhoto.setImageBitmap(bitmap);
-                } catch (FileNotFoundException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     Toast.makeText(this, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show();
                 }
