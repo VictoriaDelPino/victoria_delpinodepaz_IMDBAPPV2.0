@@ -3,6 +3,7 @@ package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -99,7 +100,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
                 actualPlace= Autocomplete.getPlaceFromIntent(data);
                 txtActualUb.setText(actualPlace.getDisplayName()+", ");
                 google_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(actualPlace.getLocation()
-                        , 10));
+                        , 15));
                 if(selectedYet==false){
                     selectedYet=true;
                 }
@@ -110,6 +111,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
     // Método llamado cuando el mapa está listo
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
+        Log.d("MAP_DEBUG", "Mapa cargado correctamente");
         google_Map=googleMap;
         LatLng ub= new LatLng(40.4168,-3.7038);
         google_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(ub,15));

@@ -277,10 +277,9 @@ public class DBManager {
         try {
             String SQL = "UPDATE users SET last_login = ? WHERE user_id = ?";
             db.execSQL(SQL, new Object[]{SessionManager.getDateLogin(), user.getUser_id()});
-            Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
+
         } catch (Exception e) {
             Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
-            Toast.makeText(context, "2Error al actualizar login", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -295,10 +294,9 @@ public class DBManager {
         try {
             String SQL = "UPDATE users SET last_logout = ? WHERE user_id = ?";
             db.execSQL(SQL, new Object[]{SessionManager.getDateLogout(), user.getUser_id()});
-            Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
+
         } catch (Exception e) {
             Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
-            Toast.makeText(context, "3Error al actualizar login", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -15,17 +15,24 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
         <TextView
             android:id="@+id/txtActualUb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center"
-            android:text="Nada seleccionado"
+            android:text="@string/empty"
             android:textSize="20sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="60dp">
@@ -34,7 +41,7 @@
                 android:id="@+id/btnSelectAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Seleccionar dirección" />
+                android:text="@string/chooseadrress" />
         </LinearLayout>
 
         <Space
@@ -65,11 +72,13 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="60dp">
@@ -78,12 +87,13 @@
                 android:id="@+id/btnConfirmAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Confirmar dirección" />
+                android:text="@string/confirm_address" />
         </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
     </LinearLayout>
 
 </LinearLayout>
