@@ -16,10 +16,12 @@ import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -35,6 +37,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
@@ -51,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
+    private CallbackManager callbackManager;
 
     //ActivityResultLauncher se encarga de manejar el resultado del intento de inicio de sesión.
     private final ActivityResultLauncher<IntentSenderRequest> signInLauncher = registerForActivityResult(
@@ -85,6 +89,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // Configura el cliente de inicio de sesión One Tap de Google
         oneTapClient = Identity.getSignInClient(this);
+        callbackManager = CallbackManager.Factory.create();
+
         signInRequest = BeginSignInRequest.builder()
                 .setGoogleIdTokenRequestOptions(
                         BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -135,29 +141,21 @@ public class LoginActivity extends AppCompatActivity {
 
         LoginButton fbLogingBnt= findViewById(R.id.login_button);
         fbLogingBnt.setPermissions("email","public_profile");
-        CallbackManager callbackManager= CallbackManager.Factory.create() ;
         fbLogingBnt.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                setContentView(R.layout.activity_launcher);
-                FirebaseAuth.getInstance().signInWithCredential(FacebookAuthProvider.getCredential(loginResult.getAccessToken().getToken()))
-                        .addOnCompleteListener(LoginActivity.this,task -> {
-                            if(task.isSuccessful()){
-                                FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
-                                updateUI( user);
-                                // Log.d("Facebook_Login",user.getEmail());
-                            }
-                        });
+                Log.d("FacebookLogin", "LoginResult recibido: " + loginResult.getAccessToken().getToken());
+                firebaseAuthWithFacebook(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
-
+                Log.d("FacebookLogin", "Inicio de sesión cancelado");
             }
 
             @Override
             public void onError(@NonNull FacebookException e) {
-
+                Log.e("FacebookLogin", "Error en el inicio de sesión", e);
             }
         });
 
@@ -217,11 +215,38 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    private void firebaseAuthWithFacebook(AccessToken token) {
+        Log.d("FacebookToken", "Token recibido: " + token.getToken()); // 🔹 Agrega este log para verificar el token
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        Log.d("FacebookLogin", "Inicio de sesión exitoso con Facebook, Usuario: " + user.getDisplayName());
+                        updateUI(user);
+                    } else {
+                        Log.e("FacebookLogin", "Error al iniciar sesión con Facebook", task.getException());
+                        Toast.makeText(getApplicationContext(), "Error de autenticación con Facebook", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        if (currentUser != null) {
+            for (UserInfo profile : currentUser.getProviderData()) { // 🔴 MODIFICACIÓN
+                if (profile.getProviderId().equals(FacebookAuthProvider.PROVIDER_ID)) {
+                    AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                    if (accessToken != null && !accessToken.isExpired()) {
+                        firebaseAuthWithFacebook(accessToken);
+                    }
+                }
+            }
+            updateUI(currentUser);
+        }
     }
 
     //Actualiza la interfaz de usuario dependiendo de si el usuario está autenticado o no.
@@ -264,5 +289,11 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("FacebookLogin", "onActivityResult ejecutado: requestCode=" + requestCode + ", resultCode=" + resultCode);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
 
 }

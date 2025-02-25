@@ -299,6 +299,10 @@ public class DBManager {
     }
 
     public static void updateUserLogout(Context context) {
+        if (AppPersistance.user == null) {
+            Log.w("DBManager", "AppPersistance.user es null; se omite la actualización del logout.");
+            return;
+        }
         User user = AppPersistance.user;
         SQLiteDatabase db = dBhelper.getWritableDatabase();
         try {

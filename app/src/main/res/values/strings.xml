@@ -47,8 +47,8 @@
 
 
     <string name="facebook_app_id">638504268729748</string>
-    <string name="fb_login_protocol_scheme">fb1234</string>
-    <string name="facebook_client_token">56789</string>
+    <string name="fb_login_protocol_scheme">fb638504268729748</string>
+
 
 
 </resources>

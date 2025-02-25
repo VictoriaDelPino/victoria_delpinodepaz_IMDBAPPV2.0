@@ -55,6 +55,10 @@ public class SessionManager {
     }
 
     public static void saveSession(EmptyCallback callback){
+        if (AppPersistance.user == null) {
+            Log.w("DBManager", "AppPersistance.user es null; se omite la actualización del logout.");
+            return;
+        }
         Map<String,String> data=new HashMap<>();
         data.put("login_time",dateLogin);
         data.put("logout_time", dateLogout);
