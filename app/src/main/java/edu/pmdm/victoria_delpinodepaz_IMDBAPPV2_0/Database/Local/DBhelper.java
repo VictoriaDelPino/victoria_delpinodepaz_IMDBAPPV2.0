@@ -1,4 +1,4 @@
-package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database;
+package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,7 +10,7 @@ public class DBhelper extends SQLiteOpenHelper {
      // Nombre del archivo de la base de datos
     private static final String DATABASE_NAME = "favoriteMovies.db";
      // Versión de la base de datos
-     private static final int DATABASE_VERSION = 1;
+     private static final int DATABASE_VERSION = 3;
      // Instancia única de DBhelper (patrón Singleton)
      private static DBhelper instance;
 
@@ -25,10 +25,22 @@ public class DBhelper extends SQLiteOpenHelper {
                     "url_photo TEXT," +
                     "PRIMARY KEY (user_id, movie_id))";// Clave primaria compuesta (un usuario no puede guardar la misma película dos veces)
 
+     // Consulta SQL para crear la tabla de usuarios
+     private static final String SQL_CREATE_USERS =
+             "CREATE TABLE users (" +
+                     "user_id TEXT PRIMARY KEY, " +
+                     "name TEXT, " +
+                     "email TEXT, " +
+                     "image BLOB, " +         // Se usa BLOB para guardar la imagen completa
+                     "address TEXT, " +
+                     "phone TEXT, " +
+                     "last_login TEXT, " +
+                     "last_logout TEXT)";
+
      /*Constructor privado para evitar instancias directas.
       Se usa el patrón Singleton para asegurar que solo haya una instancia de la base de datos.
       context Contexto de la aplicación.*/
-    private DBhelper(Context context) {
+     public DBhelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -48,9 +60,16 @@ public class DBhelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_FAVORITES);
+        // Actualización: Se crea también la tabla de usuarios
+        db.execSQL(SQL_CREATE_USERS);
     }
 
+     /*Método que actualiza la versión de la base de datos.
+       Elimina las tablas existentes y se recrea la base de datos con la nueva versión. */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS favorites");
+        db.execSQL("DROP TABLE IF EXISTS users");
+        onCreate(db);
     }
 }

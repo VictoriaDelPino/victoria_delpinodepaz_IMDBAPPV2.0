@@ -5,14 +5,14 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Editar Usuario</string>
 
     <string name="menu_home">Top 10</string>
     <string name="menu_gallery">Favoritas</string>
     <string name="menu_slideshow">Buscar Película</string>
     <string name="sign_google">Sign in with Google</string>
 
-    <string name="default_web_client_id">588017598115-capibnubrjuokdk60ujkqv6d7elshha3.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com</string>
     <string name="logout">Cerrar sesión</string>
     <string name="send_SMS">Enviar por SMS</string>
 
@@ -44,5 +44,11 @@
 
     <string name="close">Cerrar </string>
     <string name="favorite_movies_json_title">Películas Favoritas en JSON</string>
+
+
+    <string name="facebook_app_id">638504268729748</string>
+    <string name="fb_login_protocol_scheme">fb638504268729748</string>
+
+
 
 </resources>

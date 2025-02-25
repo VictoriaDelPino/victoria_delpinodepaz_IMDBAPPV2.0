@@ -9,14 +9,14 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.Delpinodepaz_victoriaIMDbApp.AppBarOverlay">
+        android:theme="@style/Theme.victoria_delpinodepaz_IMDBAPPV2_0.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Theme.Delpinodepaz_victoriaIMDbApp.PopupOverlay" />
+            app:popupTheme="@style/Theme.victoria_delpinodepaz_IMDBAPPV2_0.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

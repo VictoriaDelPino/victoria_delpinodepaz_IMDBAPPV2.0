@@ -16,13 +16,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.ApiConnection.ApiTMDB;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBSync;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 //Actividad que muestra las películas filtrada en la api TMDB
 public class SearchResultActivity extends AppCompatActivity {
@@ -42,6 +47,9 @@ public class SearchResultActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        DBSync.syncFavoritesWithSQLite(this);
+        DBSync.syncFavoritesWithFirestore();
 
         // Obtiene los datos enviados a través del Intent
         Intent intent = getIntent();
@@ -94,11 +102,11 @@ public class SearchResultActivity extends AppCompatActivity {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
                 if (currentUser != null) {
-                    String userEmail = currentUser.getEmail();
 
                     // Intenta guardar la película en la base de datos
                     try {
-                        DBManager.setUserFavorite(userEmail, movie);
+                        DBManager.setUserFavorite(SearchResultActivity.this,AppPersistance.user.getUser_id(), movie);
+
                         Toast.makeText(SearchResultActivity.this, movie.getTitle() +" "+ getString(R.string.save_as_favorite), Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(

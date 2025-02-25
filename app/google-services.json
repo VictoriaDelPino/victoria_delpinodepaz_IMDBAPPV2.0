@@ -1,65 +1,70 @@
 {
   "project_info": {
-    "project_number": "588017598115",
-    "project_id": "delpinodepaz-victoriaimdbapp",
-    "storage_bucket": "delpinodepaz-victoriaimdbapp.firebasestorage.app"
+    "project_number": "63826498706",
+    "project_id": "victoria-delpinodepaz-imdbapp",
+    "storage_bucket": "victoria-delpinodepaz-imdbapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:588017598115:android:038ebfa89f4d938afd0916",
+        "mobilesdk_app_id": "1:63826498706:android:2ace48850afee0c721c24b",
         "android_client_info": {
           "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "588017598115-capibnubrjuokdk60ujkqv6d7elshha3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp",
-            "certificate_hash": "0f6547d0dd607030bcd84a52f280615a10013843"
-          }
-        },
-        {
-          "client_id": "588017598115-dqgf5iih0ic2b0veemcl3el19gs6g6bn.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp",
-            "certificate_hash": "fef1450d765df2cf93288011f1fa298bf7050cb7"
-          }
-        },
-        {
-          "client_id": "588017598115-hllh681hept65ib6r2jf66em4uv54420.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp",
-            "certificate_hash": "9b9520e80159316d50433b873e78fa7f8af57ef6"
-          }
-        },
-        {
-          "client_id": "588017598115-hrqsugj48entbomu20ofki0nv7mhghhe.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "edu.pmdm.delpinodepaz_victoriaimdbapp",
-            "certificate_hash": "594a3db933a1b4440c12c8e3cc139d29cb3dc537"
-          }
-        },
-        {
-          "client_id": "588017598115-u7kv92ljjabhorjtiutueaesb51o8vuh.apps.googleusercontent.com",
+          "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAVN0NsDIKYLzrKZFkr9s_d_AplUz3SlSA"
+          "current_key": "AIzaSyC2hkQF2LkeL9m2PrK_fKgK9rUK_rckl_Y"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "588017598115-u7kv92ljjabhorjtiutueaesb51o8vuh.apps.googleusercontent.com",
+              "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63826498706:android:3272b0273af1dee921c24b",
+        "android_client_info": {
+          "package_name": "edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63826498706-s4q9a177gkjl5vgl3oij4d9puvegohdk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0",
+            "certificate_hash": "0f6547d0dd607030bcd84a52f280615a10013843"
+          }
+        },
+        {
+          "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2hkQF2LkeL9m2PrK_fKgK9rUK_rckl_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63826498706-7qusk4q6kvddfme4pih80dvmuahogdh4.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
