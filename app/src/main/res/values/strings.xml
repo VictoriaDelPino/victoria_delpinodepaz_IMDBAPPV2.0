@@ -49,6 +49,14 @@
     <string name="facebook_app_id">638504268729748</string>
     <string name="fb_login_protocol_scheme">fb638504268729748</string>
 
-
+    <string name="name">Nombre </string>
+    <string name="email">Email </string>
+    <string name="address">Dirección </string>
+    <string name="chooseadrress">Seleccionar dirección </string>
+    <string name="phone">Teléfono </string>
+    <string name="choose_img">Seleccionar Imagen</string>
+    <string name="save">Guardar </string>
+    <string name="confirm_address">Confirmar Dirección </string>
+    <string name="empty">Vacio </string>
 
 </resources>

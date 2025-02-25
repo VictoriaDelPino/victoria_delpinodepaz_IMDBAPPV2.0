@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="Nombre"
+            android:hint="@string/name"
             android:inputType="text" />
 
         <EditText
@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:ems="10"
             android:enabled="false"
-            android:hint="Email"
+            android:hint="@string/email"
             android:inputType="text" />
     </LinearLayout>
 
@@ -46,7 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="Address"
+            android:enabled="false"
+            android:hint="@string/address"
             android:inputType="text" />
 
         <Button
@@ -56,7 +57,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="seleccionar dirección" />
+            android:text="@string/chooseadrress" />
 
     </LinearLayout>
 
@@ -82,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="Telefono"
+            android:hint="@string/phone"
             android:inputType="phone" />
 
     </LinearLayout>
@@ -108,7 +109,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="seleccionar imagen" />
+            android:text="@string/choose_img" />
 
     </LinearLayout>
 
@@ -118,5 +119,5 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="guardar" />
+        android:text="@string/save" />
 </LinearLayout>

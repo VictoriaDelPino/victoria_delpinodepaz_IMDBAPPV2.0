@@ -20,9 +20,9 @@ public class ApiIMBD {
     private static final String HEADER_HOST = "x-rapidapi-host";
 
     //Api keys cargadas que puede usar la aplicación
-    private static final String API_KEY_1 = "c6fe9d2717msh7eeaffed3f84584p1c3319jsn676081a570f9";
+    private static final String API_KEY_3 = "61d865710emshfb0c205f293cddap1cef78jsn00f977067cf6";
     private static final String API_KEY_2 = "586f49b130msh99155cbad4559f5p12735bjsn219e7f19e09e";
-    private static final String API_KEY_3 = "5f871d3eeemsh5a94169685bb269p1e3fd8jsn031f2b0f5978";
+    private static final String API_KEY_1 = "5f871d3eeemsh5a94169685bb269p1e3fd8jsn031f2b0f5978";
     private static final List<String> API_KEYS = Arrays.asList(
             API_KEY_1, API_KEY_2, API_KEY_3);
     private static int apiKeyIndex = 0;
