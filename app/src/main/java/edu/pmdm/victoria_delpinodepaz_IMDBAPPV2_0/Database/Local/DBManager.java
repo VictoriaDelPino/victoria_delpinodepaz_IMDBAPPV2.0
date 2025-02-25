@@ -157,7 +157,7 @@ public class DBManager {
             Toast.makeText(context, "Usuario actualizado correctamente", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e("Database_", "Error al actualizar usuario: " + e.getMessage(), e);
-            Toast.makeText(context, "Error al actualizar usuario", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "1Error al actualizar usuario", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -280,7 +280,7 @@ public class DBManager {
             Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
-            Toast.makeText(context, "Error al actualizar login", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "2Error al actualizar login", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -298,7 +298,7 @@ public class DBManager {
             Toast.makeText(context, "Login actualizado correctamente", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e("Database_", "Error al actualizar login: " + e.getMessage(), e);
-            Toast.makeText(context, "Error al actualizar login", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "3Error al actualizar login", Toast.LENGTH_SHORT).show();
         }
     }
 }

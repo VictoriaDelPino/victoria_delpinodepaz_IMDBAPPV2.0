@@ -302,6 +302,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        setContentView(R.layout.activity_launcher);
         Log.d("FacebookLogin", "onActivityResult ejecutado: requestCode=" + requestCode + ", resultCode=" + resultCode);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }

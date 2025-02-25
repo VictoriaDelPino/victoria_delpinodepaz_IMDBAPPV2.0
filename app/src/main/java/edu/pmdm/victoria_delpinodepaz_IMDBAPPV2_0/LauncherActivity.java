@@ -89,7 +89,7 @@ public class LauncherActivity extends AppCompatActivity {
                     Log.w("FirebaseAuth", "El usuario no ha iniciado sesión.");
                 }
             }
-        },1500);
+        },500);
 
     }
 

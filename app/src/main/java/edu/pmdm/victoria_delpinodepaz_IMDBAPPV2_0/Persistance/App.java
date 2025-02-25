@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
+import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 
 // Clase App que extiende de Application y gestiona el ciclo de vida global de la aplicación
 
@@ -43,10 +44,16 @@ public class App extends Application {
                     //Si es la primera actividad que se inicia, verifica si el usuario está autenticado en Firebase
                     FirebaseUser fbUser= FirebaseAuth.getInstance().getCurrentUser();
                     if(fbUser!=null){
-                        //Establece la fecha de inicio de sesión y actualiza el estado del usuario en la base de datos local
-                        SessionManager.setDateLogin();
-                        DBManager.updateUserLogin(getApplicationContext());
-                        Log.d("CICLO_Vida","sessionToken - INICIO" );
+                        FirestoreManager.getUser(fbUser.getEmail(), resultUser ->{
+                            if (resultUser != null) {
+                                AppPersistance.user= DBManager.getOrCreateUser(getApplicationContext(),fbUser, resultUser.getUser_id() );
+                                //Establece la fecha de inicio de sesión y actualiza el estado del usuario en la base de datos local
+                                SessionManager.setDateLogin();
+                                DBManager.updateUserLogin(getApplicationContext());
+                                Log.d("CICLO_Vida","sessionToken - INICIO" );
+                            }
+                        });
+
                     }
 
                 }
@@ -75,6 +82,14 @@ public class App extends Application {
                     SessionManager.saveSession(new EmptyCallback() {
                         @Override
                         public void onResult(Boolean b) {
+                            AppPersistance.user.setUser_id("");
+                            AppPersistance.user.setName("");
+                            AppPersistance.user.setImage(new byte[0]);
+                            AppPersistance.user.setEmail("");
+                            AppPersistance.user.setAddress("");
+                            AppPersistance.user.setLogin("");
+                            AppPersistance.user.setLogout("");
+                            AppPersistance.user.setPhone("");
                             Log.d("CICLO_Vida","sessionToken - FINAL" );
                         }
                     });

@@ -49,20 +49,20 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
 
         Context context=getApplicationContext();
 
+        // Inicializa de elementos de la interfaz
         btnSlectAddress=findViewById(R.id.btnSelectAddress);
         txtActualUb=findViewById(R.id.txtActualUb);
-
-
         mapView=findViewById(R.id.mapView);
+
+        // Restaura estado del mapa
         Bundle mapBundle= null;
         if(savedInstanceState!=null){
             mapBundle=savedInstanceState.getBundle("map");
         }
         mapView.onCreate(mapBundle);
-
         mapView.getMapAsync(this);
 
-
+        // Configura el botón para seleccionar dirección mediante Google Places
         btnSlectAddress.setOnClickListener(v->{
             List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME,Place.Field.LAT_LNG);
             Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
@@ -70,7 +70,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
             startActivityForResult(intent, 1009);
         });
 
-
+        // Configura el botón de confirmación de dirección
         btnConfirmAddress=findViewById(R.id.btnConfirmAddress);
         btnConfirmAddress.setOnClickListener(v->{
             Intent resultIntent = new Intent();
@@ -93,6 +93,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Maneja el resultado de la selección de dirección
         if(requestCode==1009 && data!=null){
             if(resultCode==RESULT_OK){
                 actualPlace= Autocomplete.getPlaceFromIntent(data);
@@ -106,6 +107,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
         }
     }
 
+    // Método llamado cuando el mapa está listo
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         google_Map=googleMap;
@@ -113,6 +115,7 @@ public class SelectAddressActivity extends AppCompatActivity implements OnMapRea
         google_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(ub,15));
     }
 
+    // Guarda estado del mapa
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);

@@ -211,6 +211,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResult(Boolean b) {
                 Log.d("CICLO_Vida","sessionToken - FINAL" );
+                AppPersistance.user.setUser_id("");
+                AppPersistance.user.setName("");
+                AppPersistance.user.setImage(new byte[0]);
+                AppPersistance.user.setEmail("");
+                AppPersistance.user.setAddress("");
+                AppPersistance.user.setLogin("");
+                AppPersistance.user.setLogout("");
+                AppPersistance.user.setPhone("");
                 finishAffinity();
                 System.exit(0);
             }
