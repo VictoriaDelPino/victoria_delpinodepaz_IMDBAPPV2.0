@@ -1,34 +1,24 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance;
 
-
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 
 public class SessionManager {
 
     private static String dateLogin;
     private static String dateLogout;
 
+    //Obtiene la fecha y hora actual en formato "dd/MM/yyyy HH:mm:ss"
     private static String getActualDate(){
         LocalDateTime date= LocalDateTime.now();
         DateTimeFormatter formatter= DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -36,41 +26,48 @@ public class SessionManager {
         return dateFormatted;
     }
 
+    //Establece la fecha y hora de inicio de sesión
     public static void setDateLogin(){
         dateLogin=getActualDate();
 
     }
 
+    //Establece la fecha y hora de cierre de sesión
     public static void setDateLogout(){
         dateLogout=getActualDate();
 
     }
 
+    //Devuelve la fecha y hora de inicio de sesión
     public static String getDateLogin() {
         return dateLogin;
     }
 
+    //Devuelve la fecha y hora de cierre de sesión
     public static String getDateLogout() {
         return dateLogout;
     }
 
+    //Guarda los datos de la sesión en Firestore
     public static void saveSession(EmptyCallback callback){
         if (AppPersistance.user == null) {
             Log.w("DBManager", "AppPersistance.user es null; se omite la actualización del logout.");
             return;
         }
+        //Crea un mapa con los datos de login y logout
         Map<String,String> data=new HashMap<>();
         data.put("login_time",dateLogin);
         data.put("logout_time", dateLogout);
 
         FirebaseFirestore fb= FirebaseFirestore.getInstance();
+        //Busca al usuario en Firestore con el user_id
         fb.collection("users").whereEqualTo("user_id", AppPersistance.user.getUser_id()).get().addOnCompleteListener(task->{
            if(task.isSuccessful()){
                if(!task.getResult().getDocuments().isEmpty()) {
-
-
+                   //Obtiene la referencia al documento del usuario en Firestore
                    DocumentReference docRef=fb.collection("users").document(AppPersistance.user.getUser_id());
 
+                   //Agrega los datos de sesión al campo "activity_log"
                        docRef.update("activity_log", FieldValue.arrayUnion(data)).addOnSuccessListener(aVoid->
                                {Log.d("CICLO_vida","sesion guardada exitosamente");
                                    dateLogin="";
@@ -83,12 +80,8 @@ public class SessionManager {
                            Log.d("CICLO_vida","error al guardar la sesion");
                            callback.onResult(false);
                        });
-
-
                }
            }
         });
     }
-
-
 }

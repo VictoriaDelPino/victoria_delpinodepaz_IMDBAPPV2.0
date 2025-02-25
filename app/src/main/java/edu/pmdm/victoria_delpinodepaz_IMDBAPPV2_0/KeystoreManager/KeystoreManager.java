@@ -1,6 +1,5 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.KeystoreManager;
 
-
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
@@ -13,13 +12,23 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
+
+/* Clase que gestiona la encriptación y desencriptación utilizando el Android KeyStore.
+   Esta clase se encarga de generar o recuperar una clave secreta y de utilizarla para cifrar y descifrar datos
+   mediante el algoritmo AES en modo GCM (Galois/Counter Mode) sin padding
+*/
 public class KeystoreManager {
 
+    //Nombre del almacén de claves de Android
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
+   // Identificador único para la clave dentro del KeyStore
     private static final String ALIAS = "MyKeyAlias";
+    //Especifica el algoritmo, modo y padding para el cifrado
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
-    private static final int IV_SIZE = 12; // Recomendado para GCM
-    private static final int TAG_SIZE = 128; // Tamaño de la etiqueta (en bits)
+    //Tamaño del vector de inicialización
+    private static final int IV_SIZE = 12;
+    // Tamaño de la etiqueta (en bits)
+    private static final int TAG_SIZE = 128;
 
     // Obtiene o genera la clave secreta en el AndroidKeyStore
     private static SecretKey getSecretKey() throws Exception {

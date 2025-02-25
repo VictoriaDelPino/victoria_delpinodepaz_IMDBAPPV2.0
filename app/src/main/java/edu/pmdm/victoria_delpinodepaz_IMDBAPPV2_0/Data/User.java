@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
+//Clase para crear objetos de tipo usuario
 public class User implements Parcelable {
     private String user_id;
     private String name;
@@ -17,6 +18,7 @@ public class User implements Parcelable {
     private String logout;
     private String phone;
 
+    //Constructor con parametros
     public User(String login, String logout, String address, String email, byte[] image, String name, String phone, String user_id) {
         this.login = login;
         this.logout = logout;
@@ -28,8 +30,10 @@ public class User implements Parcelable {
         this.user_id = user_id;
     }
 
+    //Constructor vacio
     public User() { }
 
+    // Constructor protegido para reconstruir el objeto User a partir de un Parcel
     protected User(Parcel in) {
         user_id = in.readString();
         name = in.readString();
@@ -41,6 +45,7 @@ public class User implements Parcelable {
         logout = in.readString();
     }
 
+    // Objeto CREATOR necesario para implementar la interfaz Parcelable
     public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
@@ -102,6 +107,7 @@ public class User implements Parcelable {
         this.logout = logout;
     }
 
+    // Método para escribir los datos del objeto en un Parcel
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeString(user_id);
@@ -113,11 +119,14 @@ public class User implements Parcelable {
         parcel.writeString(login);
         parcel.writeString(logout);
     }
+
+    // Método que describe el contenido del Parcelable
     @Override
     public int describeContents() {
         return 0;
     }
 
+    //Método que compara dos objetos User
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -133,6 +142,7 @@ public class User implements Parcelable {
                 Objects.equals(logout, user.logout);
     }
 
+    //Método que genera un código hash basado en los atributos del objeto
     @Override
     public int hashCode() {
         return Objects.hash(user_id, name, image, email, address, phone, login, logout);

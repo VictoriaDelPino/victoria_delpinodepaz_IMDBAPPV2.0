@@ -26,16 +26,10 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
 
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.DBSync;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBhelper;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.App;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.databinding.ActivityMainBinding;
@@ -57,10 +51,12 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+        // Inicializa Places API si no ha sido inicializada
         if(!Places.isInitialized()){
             Places.initialize(getApplicationContext(), "AIzaSyAER7D-uvYpBOG3wZjz9z3AeGulqAci-OU");
         }
 
+        // Actualiza la fecha de inicio de sesión y sincroniza el usuario en la base de datos
         SessionManager.setDateLogin();
         DBManager.updateUserLogin(getApplicationContext());
 
@@ -70,9 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.appBarMain.toolbar);
 
 
-
-
-        // Configuración del Navigation Drawer
+        // Configura el Navigation Drawer
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -87,14 +81,12 @@ public class MainActivity extends AppCompatActivity {
         View headerView = navigationView.getHeaderView(0);
 
 
-
         // Busca y asigna los elementos de la interfaz dentro del header
         btnLogOut = headerView.findViewById(R.id.btnLogOut);
         txtEmail = headerView.findViewById(R.id.txtEmail);
         txtUserName = headerView.findViewById(R.id.txtUserName);
         imgUserPhoto = headerView.findViewById(R.id.imgUserPhoto);
 
-        // Si hay un usuario autenticado, muestra su información
         // Si hay un usuario autenticado, muestra su información
         if(AppPersistance.user != null) {
             txtEmail.setText(AppPersistance.user.getEmail());
@@ -118,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, getString(R.string.session_closed), Toast.LENGTH_SHORT).show();
                 SessionManager.setDateLogout();
                 DBManager.updateUserLogout(getApplicationContext());
+
+                // Guarda la sesión (Activity_log) y cierra sesión de Firebase y Facebook
                 SessionManager.saveSession(new EmptyCallback() {
                     @Override
                     public void onResult(Boolean b) {
@@ -132,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
                             AppPersistance.user.setLogout("");
                             AppPersistance.user.setPhone("");
 
-
                             FirebaseAuth.getInstance().signOut();
                             LoginManager.getInstance().logOut();
                             restartApp();
@@ -141,41 +134,18 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-               // startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                //finish();
-
             }
         });
     }
 
     // Método para reiniciar la aplicación
     public void restartApp() {
-        // Crear un Intent para lanzar la actividad principal
         Intent intent = new Intent(MainActivity.this, LauncherActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        // Iniciar la actividad
         startActivity(intent);
-        // Finalizar la actividad actual
+        // Finaliza la actividad actual
         finish();
 
-    }
-
-    /*Método para descargar una imagen desde una URL.
-    Se utiliza para cargar la foto de perfil del usuario.*/
-    private Bitmap downloadImage(String urlString) {
-        Bitmap bitmap = null;
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            bitmap = BitmapFactory.decodeStream(input);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bitmap;
     }
 
     @Override
@@ -185,17 +155,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
+        //Abre la actividad de editar usuario
         if (id == R.id.action_settings) {
-            // Acción al hacer clic en "Settings"
             Intent intent = new Intent(this, EditUserActivity.class);
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -210,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        //Al entrar sincroniza las bases de datos
         DBSync.syncFavoritesWithSQLite(MainActivity.this);
         DBSync.syncFavoritesWithFirestore();
     }
@@ -221,9 +191,7 @@ public class MainActivity extends AppCompatActivity {
         View headerView = navigationView.getHeaderView(0);
         TextView txtUserName = headerView.findViewById(R.id.txtUserName);
         ImageView imgUserPhoto = headerView.findViewById(R.id.imgUserPhoto);
-
         txtUserName.setText(AppPersistance.user.getName());
-        // Convertir byte[] a Bitmap para mostrar la imagen:
         if (AppPersistance.user.getImage() != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(AppPersistance.user.getImage(), 0, AppPersistance.user.getImage().length);
             imgUserPhoto.setImageBitmap(bitmap);
@@ -235,8 +203,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        //Cierra la sesion
         SessionManager.setDateLogout();
         DBManager.updateUserLogout(this);
+        //Espera que se haya guardado el activity_log para cerrar
         SessionManager.saveSession(new EmptyCallback() {
             @Override
             public void onResult(Boolean b) {

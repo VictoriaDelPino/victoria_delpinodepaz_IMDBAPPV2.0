@@ -1,6 +1,5 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,8 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -39,14 +36,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.User;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirebaseAuthManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 
-//Actividad encargada de gestionar el proceso de inicio de sesión con Google mediante Firebase.
+//Actividad encargada de gestionar el proceso de inicio de sesión
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
@@ -56,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
     private BeginSignInRequest signInRequest;
     private CallbackManager callbackManager;
 
-    //ActivityResultLauncher se encarga de manejar el resultado del intento de inicio de sesión.
+    //Maneja el resultado del intento de inicio de sesión
     private final ActivityResultLauncher<IntentSenderRequest> signInLauncher = registerForActivityResult(
             new ActivityResultContracts.StartIntentSenderForResult(),
             result -> {
@@ -77,8 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
 
-    /* Método que se ejecuta al crear la actividad. Inicializa Firebase, configura One Tap Sign-In y
-    establece la acción del botón de inicio de sesión.*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,7 +97,10 @@ public class LoginActivity extends AppCompatActivity {
         EditText editTextEmail=findViewById(R.id.eTxtEmail);
 
         Button btnRegisterEmail=findViewById(R.id.btnRegisterEmail);
+
+        //Registro de un nuevo usuario con email y contraseña
         btnRegisterEmail.setOnClickListener(v->{
+            //Obtiene el email y la contraseña ingresados por el usuario
             EditText eTxtEmail=findViewById(R.id.eTxtEmail);
             String email= eTxtEmail.getText().toString();
             EditText eTxtPassword=findViewById(R.id.eTxtPassword);
@@ -112,12 +109,15 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         Button btnLoginEmail=findViewById(R.id.btnLoginEmail);
+        //Login con usuario y contraseña
         btnLoginEmail.setOnClickListener(v -> {
+            //Obtiene el email y la contraseña para iniciar sesión con Firebase
             EditText eTxtEmail = findViewById(R.id.eTxtEmail);
             String email = eTxtEmail.getText().toString();
             EditText eTxtPassword = findViewById(R.id.eTxtPassword);
             String password = eTxtPassword.getText().toString();
 
+            //Verifica si los datos son correctos
             FirebaseAuthManager.login(this, email, password, new FirebaseAuthManager.OnLoginListener() {
                 @Override
                 public void onSuccess() {
@@ -128,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Error: No se pudo obtener el usuario", Toast.LENGTH_SHORT).show();
                     }
                 }
-
                 @Override
                 public void onFailure(String errorMessage) {
                     Toast.makeText(getApplicationContext(), "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
@@ -136,10 +135,31 @@ public class LoginActivity extends AppCompatActivity {
             });
         });
 
+        // Validación de email en tiempo real
+        editTextEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!Patterns.EMAIL_ADDRESS.matcher(s).matches()) {
+                    editTextEmail.setError("Correo electrónico inválido");
+                    btnLoginEmail.setEnabled(false);
+                    btnRegisterEmail.setEnabled(false);
+                } else {
+                    editTextEmail.setError(null);
+                    btnLoginEmail.setEnabled(true);
+                    btnRegisterEmail.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
 
         LoginButton fbLogingBnt= findViewById(R.id.login_button);
+        // Configura el botón de inicio de sesión con Facebook
         fbLogingBnt.setPermissions("email","public_profile");
         fbLogingBnt.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -160,25 +180,9 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
-        editTextEmail.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (!Patterns.EMAIL_ADDRESS.matcher(s).matches()) {
-                    editTextEmail.setError("Correo electrónico inválido");
-                } else {
-                    editTextEmail.setError(null);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
 
 
-        // Asigna el botón de inicio de sesión y define su comportamiento
+        // Asigna el botón de inicio de sesión de Google y define su comportamiento
         Button signInButton = findViewById(R.id.signInButton);
         signInButton.setOnClickListener(v -> startSignIn());
     }
@@ -215,13 +219,14 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    // Autentica el usuario en Firebase con el token de Facebook
     private void firebaseAuthWithFacebook(AccessToken token) {
         Log.d("FacebookToken", "Token recibido: " + token.getToken()); // 🔹 Agrega este log para verificar el token
-
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        // Obtiene el usuario autenticado
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                         Log.d("FacebookLogin", "Inicio de sesión exitoso con Facebook, Usuario: " + user.getDisplayName());
                         updateUI(user);
@@ -237,7 +242,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            for (UserInfo profile : currentUser.getProviderData()) { // 🔴 MODIFICACIÓN
+            for (UserInfo profile : currentUser.getProviderData()) {
                 if (profile.getProviderId().equals(FacebookAuthProvider.PROVIDER_ID)) {
                     AccessToken accessToken = AccessToken.getCurrentAccessToken();
                     if (accessToken != null && !accessToken.isExpired()) {
@@ -252,23 +257,28 @@ public class LoginActivity extends AppCompatActivity {
     //Actualiza la interfaz de usuario dependiendo de si el usuario está autenticado o no.
     private void updateUI(FirebaseUser user) {
         if (user != null) {
+            //Comprueba si esta en firestore
                 FirestoreManager.getUser(user.getEmail(), resultUser ->{
                     if (resultUser != null) {
+                        //Asigna al usuario y comprueba si existe en la base de datos local
                         AppPersistance.user = DBManager.getOrCreateUser(this,user, resultUser.getUser_id());
                         Log.d("AppPersis",AppPersistance.user.getEmail().toString());
-                        Log.d("CICLO_Vida","sessionToken - INICIO" );
+                        //Abre la actividad principal
                         Intent intent = new Intent(this, MainActivity.class);
                         startActivity(intent);
                         finishAffinity();
                     }
                     else {
+                        //Si no existe crea el usuario en firestore
                         FirestoreManager.createUser(result ->{
                             if (result ) {
                                 if (user  != null) {
                                     FirestoreManager.getUser(user.getEmail(),resultNewUser ->{
                                         if (resultNewUser != null) {
+                                            //Asigna al usuario y comprueba si existe en la base de datos local
                                             AppPersistance.user = DBManager.getOrCreateUser(this,user,resultNewUser.getUser_id());
                                             Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+                                            //Abre actividad principal
                                             Intent intent = new Intent(this, MainActivity.class);
                                             startActivity(intent);
                                             finishAffinity();

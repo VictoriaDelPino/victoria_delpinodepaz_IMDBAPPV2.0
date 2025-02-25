@@ -25,6 +25,7 @@ public class DBhelper extends SQLiteOpenHelper {
                     "url_photo TEXT," +
                     "PRIMARY KEY (user_id, movie_id))";// Clave primaria compuesta (un usuario no puede guardar la misma película dos veces)
 
+     // Consulta SQL para crear la tabla de usuarios
      private static final String SQL_CREATE_USERS =
              "CREATE TABLE users (" +
                      "user_id TEXT PRIMARY KEY, " +
@@ -59,9 +60,12 @@ public class DBhelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_FAVORITES);
+        // Actualización: Se crea también la tabla de usuarios
         db.execSQL(SQL_CREATE_USERS);
     }
 
+     /*Método que actualiza la versión de la base de datos.
+       Elimina las tablas existentes y se recrea la base de datos con la nueva versión. */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS favorites");

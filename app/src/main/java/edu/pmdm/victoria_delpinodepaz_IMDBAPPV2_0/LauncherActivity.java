@@ -20,8 +20,8 @@ import com.google.firebase.auth.FirebaseUser;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
 
+//Primera actividad de la aplicación
 public class LauncherActivity extends AppCompatActivity {
 
     @Override
@@ -35,15 +35,15 @@ public class LauncherActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Obtener instancia de SharedPreferences
+        // Obtiene la instancia de SharedPreferences para verificar si es la primera ejecución
         SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         boolean isFirstRun = prefs.getBoolean("isFirstRun", true);
 
         if (isFirstRun) {
-            // Primera vez que se ejecuta después de una instalación → Cerrar sesión
+            // Si es la primera vez que se ejecuta después de una instalación cierra sesión
             FirebaseAuth.getInstance().signOut();
 
-            // Marcar que la app ya se ha ejecutado
+            // Guarda en las preferencias que la app ya se ha ejecutado al menos una vez
             prefs.edit().putBoolean("isFirstRun", false).apply();
         }
 
@@ -51,23 +51,30 @@ public class LauncherActivity extends AppCompatActivity {
         // Inicializa la base de datos local
         DBManager.init(this);
 
-        // Obtiene la instancia de Firebase Auth y el usuario actual
+        // Obtiene la instancia de FirebaseAuth para verificar si hay un usuario autenticado
         FirebaseUser fbUser= FirebaseAuth.getInstance().getCurrentUser();
         Context context= this;
+
+        //Usa un Handler para retrasar la ejecución del siguiente bloque de código 1.5 segundos
+        //y mientras se muestra la pantalla de "carga"
         Handler handler= new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 //Comprobacion de que el usuario tiene los datos en firestore
                 if (fbUser != null) {
+                    //Busca los datos del usuario en Firestore para asegurarse de que existen
                         FirestoreManager.getUser(fbUser.getEmail(),resultUser ->{
                             if (resultUser != null) {
-
+                                //Si el usuario existe en Firestore, lo almacena en la persistencia de la app
                                 AppPersistance.user = DBManager.getOrCreateUser( context,  fbUser, resultUser.getUser_id());
                                 Log.d("AppPersis",AppPersistance.user.getEmail().toString());
+
+                                //Inicia la actividad principal de la aplicación
                                 Intent intent = new Intent(context, MainActivity.class);
                                 startActivity(intent);
                             } else {
+                                //Si no se encuentra el usuario en Firestore, redirige al LoginActivity
                                 Log.e("FirestoreError", "No se pudo obtener el usuario desde Firestore");
                                 startActivity(new Intent(context, LoginActivity.class));
                             }
@@ -75,6 +82,8 @@ public class LauncherActivity extends AppCompatActivity {
 
 
                 } else {
+
+                    //Si no hay usuario autenticado, redirige directamente al LoginActivity
                     startActivity(new Intent(context, LoginActivity.class));
                     finish();
                     Log.w("FirebaseAuth", "El usuario no ha iniciado sesión.");

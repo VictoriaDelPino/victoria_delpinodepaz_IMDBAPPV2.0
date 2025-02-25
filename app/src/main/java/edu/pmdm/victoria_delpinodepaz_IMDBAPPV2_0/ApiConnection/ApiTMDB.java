@@ -135,7 +135,7 @@ public class ApiTMDB {
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
 
-                // Validación del código de respuesta HTTP
+                // Valida el código de respuesta HTTP
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

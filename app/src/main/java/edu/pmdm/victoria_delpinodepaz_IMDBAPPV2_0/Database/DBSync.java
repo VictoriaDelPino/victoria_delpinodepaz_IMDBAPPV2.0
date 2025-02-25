@@ -6,7 +6,6 @@ import static edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManage
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,10 +19,11 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class DBSync {
 
+    //Método que sincroniza la base de datos local con lo que pasa en firestore
     public static void syncFavoritesWithSQLite(Context context) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // 🔹 Paso 1: Obtener favoritos existentes (Sincronización inicial)
+        // Obtiene los favoritos existentes (Sincronización inicial)
         db.collection("favorites")
                 .document(AppPersistance.user.getUser_id())
                 .collection("movies")
@@ -32,6 +32,7 @@ public class DBSync {
                     if (task.isSuccessful()) {
 
                         try {
+                            //Recorre todos los documentos obtenidos y extrae los datos de la película
                             for (DocumentSnapshot doc : task.getResult()) {
                                 String movieId = doc.getId();
                                 String title = doc.getString("title");
@@ -40,6 +41,7 @@ public class DBSync {
                                 String photoUrl = doc.getString("posterURL");
                                 Movie movie= new Movie(description,title,photoUrl,releaseDate,movieId, "");
 
+                                //Guardar la película como favorita en SQLite
                                 setUserFavorite(context,AppPersistance.user.getUser_id(), movie);
                             }
                         } catch (Exception e) {
@@ -48,18 +50,21 @@ public class DBSync {
                     }
                 });
 
-        // 🔹 Paso 2: Escuchar cambios en tiempo real
+        // Escucha cambios en tiempo real
         db.collection("favorites")
                 .document(AppPersistance.user.getUser_id())
                 .collection("movies")
                 .addSnapshotListener((snapshots, e) -> {
+                    // Manejo de errores en el listener de cambios en tiempo real
                     if (e != null) {
                         Log.e("FirestoreSync", "Error al sincronizar favoritos en tiempo real", e);
                         return;
                     }
 
                     try {
+                        // Recorre los cambios en los documentos de la colección
                         for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            //Extrae información de la película del documento modificado
                             DocumentSnapshot doc = dc.getDocument();
                             String movieId = doc.getId();
                             String title = doc.getString("title");
@@ -67,6 +72,7 @@ public class DBSync {
                             String releaseDate = doc.getString("releaseDate");
                             String photoUrl = doc.getString("posterURL");
                             Movie movie= new Movie(description,title,photoUrl,releaseDate,movieId, "");
+                            //Dependiendo del tipo de cambio, agregar o eliminar el favorito en SQLite
                             switch (dc.getType()) {
                                 case ADDED:
                                 case MODIFIED:
@@ -83,11 +89,11 @@ public class DBSync {
                 });
     }
 
+    //Método para sincronizar firestore con la informacion de la base de datos local
     public static void syncFavoritesWithFirestore(){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         List<Movie> movieList =getUserFavorites(AppPersistance.user.getUser_id());
         for(Movie movie : movieList){
-
             FirestoreManager.addFavorite(movie, res->{
                 Log.d("FirebaseFav","Resultado addFavoriteFirebase: "+res);
             });

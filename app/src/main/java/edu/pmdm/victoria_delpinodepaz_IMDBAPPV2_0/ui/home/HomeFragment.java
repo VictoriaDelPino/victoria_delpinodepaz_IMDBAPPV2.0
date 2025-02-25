@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment {
     private void setupRecyclerView() {
         //Llama a la API para cargar el top 10 de películas
         movieList=new ArrayList<>();
-        //movieList = ApiIMBD.getTop10Movie();
+        movieList = ApiIMBD.getTop10Movie();
 
         // Configura RecyclerView con GridLayoutManager para 2 columnas
         binding.recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));

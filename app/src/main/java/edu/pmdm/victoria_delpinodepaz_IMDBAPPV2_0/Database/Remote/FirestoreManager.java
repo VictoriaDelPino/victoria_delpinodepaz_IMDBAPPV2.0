@@ -1,25 +1,13 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,26 +17,27 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.UserCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
+// Clase FirestoreManager que gestiona las operaciones remotas utilizando Firebase Firestore.
 public class FirestoreManager {
 
-
+    // Método que obtiene y devuelve la instancia de FirebaseFirestore.
     private static FirebaseFirestore getInstace(){
         FirebaseFirestore dbFirestore= FirebaseFirestore.getInstance();
         return dbFirestore;
     }
 
+    // Crea un usuario en Firestore si no existe ya en la colección "users".
     public static void createUser(EmptyCallback callback){
 
-        //implementar tambien un ejecutor
         String email=FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseFirestore db= getInstace();
 
-        //Primer paso: comprobacion de que el usuario no existe en la base de datos de Firestore
+        //Comprueba que el usuario no existe en la base de datos de Firestore
         db.collection("users").whereEqualTo("email",email).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 QuerySnapshot documents= task.getResult();
                 if(documents.isEmpty()){
-                    //Si el usuario no existe lo creamos
+                    //Si el usuario no existe lo crea
                     FirebaseAuth mAuth;
                     FirebaseUser currentUser;
                     mAuth = FirebaseAuth.getInstance();
@@ -62,7 +51,7 @@ public class FirestoreManager {
                         data.put("activity_log","");
                         db.collection("users").add(data)
                                 .addOnSuccessListener(documentReference -> {
-                                    //Usuario añadido con exito a la coleccion users
+                                    //Si el usuario ha sido añadido con exito a la coleccion users
                                     Map <String,Object> dataUpdate= new HashMap<>();
                                     dataUpdate.put("user_id", documentReference.getId());
                                     documentReference.update(dataUpdate).
@@ -84,10 +73,9 @@ public class FirestoreManager {
             }
 
         });
-
-
     }
 
+    // Obtiene un usuario de Firestore por su email y devuelve el User en el callback.
     public static void getUser(String email, UserCallback callback){
         FirebaseFirestore db=getInstace();
         db.collection("users").whereEqualTo("email",email).get().addOnCompleteListener(task -> {
@@ -110,76 +98,11 @@ public class FirestoreManager {
         } );
     }
 
-   /* public static void updateUser(String userId, String name, String address, String phone, Uri imgUri, Context context, EmptyCallback callback) {
-        FirebaseFirestore db = getInstace();
-       // db.collection("users").whereEqualTo("user_id", userId).get().addOnCompleteListener()
-
-        try {
-            // Convertir URI en Bitmap
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imgUri);
-
-            // Verificar que el Bitmap no sea null
-            if (bitmap == null) {
-                Log.e("UpdateUser", "Error: Bitmap es NULL");
-                callback.onResult(false);
-                return;
-            }
-
-            // Convertir Bitmap a byte[]
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageData = baos.toByteArray();
-
-            Log.d("UpdateUser", "Iniciando subida de imagen para el usuario: " + userId);
-
-            // Subir imagen a Firebase Storage
-            storageRef.putBytes(imageData)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        Log.d("UpdateUser", "Imagen subida exitosamente.");
-                        storageRef.getDownloadUrl()
-                                .addOnSuccessListener(uri -> {
-                                    String imageUrl = uri.toString();
-                                    Log.d("UpdateUser", "URL de descarga obtenida: " + imageUrl);
-                                    updateUserData(db, userId, name, address, phone, imageUrl, callback);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("UpdateUser", "Error al obtener URL de descarga", e);
-                                    callback.onResult(false);
-                                });
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("UpdateUser", "Error al subir la imagen", e);
-                        callback.onResult(false);
-                    });
-        } catch (IOException e) {
-            Log.e("UpdateUser", "Error al convertir URI a Bitmap", e);
-            callback.onResult(false);
-        }
-    }
-
-
-
-
-    private static void updateUserData(FirebaseFirestore db, String userId, String name, String address, String phone, String imageUrl, EmptyCallback callback) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("name", name);
-        updates.put("address", address);
-        updates.put("phone", phone);
-        if (imageUrl != null) {
-            updates.put("image", imageUrl);
-        }
-
-        db.collection("users").document(userId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onResult(true))
-                .addOnFailureListener(e -> callback.onResult(false));
-    }*/
-
-
-
+    // Agrega una película a la colección de favoritos en Firestore para el usuario actual.
     public static void addFavorite(Movie favorite, EmptyCallback callback){
         FirebaseFirestore bd= getInstace();
 
+        //Comprueba si la pelicula ya existe en la colección
         bd.collection("favorites")
                 .document(AppPersistance.user.getUser_id())
                 .collection("movies")
@@ -188,7 +111,6 @@ public class FirestoreManager {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         boolean exist = false;
-
                         if (!querySnapshot.isEmpty()) {
                             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                                 if (doc.getId().equals(favorite.getId())) {
@@ -197,8 +119,8 @@ public class FirestoreManager {
                                 }
                             }
                         }
-
                         if (!exist) {
+                            // Prepara los datos de la película para ser añadida
                             Map<String, Object> newDoc = new HashMap<>();
                             newDoc.put("id", favorite.getId());
                             newDoc.put("overview", favorite.getDescription());
@@ -206,7 +128,7 @@ public class FirestoreManager {
                             newDoc.put("rating", "");
                             newDoc.put("releaseDate", favorite.getReleaseDate());
                             newDoc.put("title", favorite.getTitle());
-
+                            //Guarda la película
                             bd.collection("favorites")
                                     .document(AppPersistance.user.getUser_id())
                                     .collection("movies")
@@ -232,9 +154,9 @@ public class FirestoreManager {
 
     }
 
+    // Elimina una película de la colección de favoritos en Firestore para el usuario actual.
     public static void removeFavorite(String movieId, EmptyCallback callback) {
         FirebaseFirestore db = getInstace();
-
         db.collection("favorites")
                 .document(AppPersistance.user.getUser_id())
                 .collection("movies")

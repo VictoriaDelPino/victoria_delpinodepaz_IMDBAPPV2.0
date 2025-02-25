@@ -16,18 +16,21 @@ import com.google.firebase.auth.FirebaseUser;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.EmptyCallback;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
 
+// Clase App que extiende de Application y gestiona el ciclo de vida global de la aplicación
 
 public class App extends Application {
 
+    // Contador de actividades activas
     private int activityCount=0;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        //Log.d("CICLO_Vida","OnAppCreate" );
-        // Inicializar el SDK de Facebook
+        // Inicializa el SDK de Facebook
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
+
+        //  Registra los callbacks del ciclo de vida de la aplicación
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle bundle) {
@@ -37,8 +40,10 @@ public class App extends Application {
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
                 if(activityCount==0){
+                    //Si es la primera actividad que se inicia, verifica si el usuario está autenticado en Firebase
                     FirebaseUser fbUser= FirebaseAuth.getInstance().getCurrentUser();
                     if(fbUser!=null){
+                        //Establece la fecha de inicio de sesión y actualiza el estado del usuario en la base de datos local
                         SessionManager.setDateLogin();
                         DBManager.updateUserLogin(getApplicationContext());
                         Log.d("CICLO_Vida","sessionToken - INICIO" );
@@ -61,7 +66,9 @@ public class App extends Application {
 
             @Override
             public void onActivityStopped(@NonNull Activity activity) {
+                //Decrementa el contador de actividades activas
                 activityCount--;
+                //Si no hay más actividades activas, establece la fecha de cierre de sesión y guarda la sesión
                 if(activityCount==0){
                     SessionManager.setDateLogout();
                     DBManager.updateUserLogout(getApplicationContext());
@@ -88,7 +95,4 @@ public class App extends Application {
             }
         });
     }
-
-
-
 }

@@ -7,21 +7,18 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -30,27 +27,20 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.gson.Gson;
 import com.hbb20.CountryCodePicker;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
 
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Data.PhoneCode;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local.DBManager;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Remote.FirestoreManager;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 
 public class EditUserActivity extends AppCompatActivity {
 
+    //Declaración de variables para los elementos de la interfaz de usuario
     private EditText eTxtName;
     private EditText eTxtEmail;
     private EditText eTxtPhone;
@@ -59,21 +49,26 @@ public class EditUserActivity extends AppCompatActivity {
     private Button btnPhoto;
     private Button btnSave;
     private ImageView imgPhoto;
-    private Spinner spinnerPhoneCodes;
+
+    // Constantes para identificar la fuente de la imagen seleccionada
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_GALLERY = 2;
+
     private Uri selectedImage;
     private String selectedPlaceName;
     private LatLng selectedLatlng;
-    private String phoneNumber;
     private CountryCodePicker ccp;
+
+    // Constante para la solicitud de permisos de ubicación
     private static final int REQUEST_LOCATION_PERMISSION = 1001;
 
+    //Lanzador de actividades para seleccionar una dirección
     private final ActivityResultLauncher<Intent> addressLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Boolean selected= result.getData().getBooleanExtra("selected_address",false);
                     if(selected){
+                        //Obtiene la información de la dirección seleccionada
                         String addressName=result.getData().getStringExtra("address_name");
                         float addressLat=result.getData().getFloatExtra("address_lat",0f);
                         float addressLng=result.getData().getFloatExtra("address_lng",0f);
@@ -99,7 +94,7 @@ public class EditUserActivity extends AppCompatActivity {
             return insets;
         });
 
-
+        //Enlace de elementos de la interfaz con variables
         eTxtName = findViewById(R.id.eTxtNameEditUser);
         eTxtEmail = findViewById(R.id.eTxtEmailEdit);
         eTxtAddress = findViewById(R.id.eTxtAddressEditUser);
@@ -110,11 +105,14 @@ public class EditUserActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         ccp=findViewById(R.id.ccp);
 
+
+        //Cargar los datos del usuario actual en los campos de texto
         eTxtName.setText(AppPersistance.user.getName());
         eTxtEmail.setText(AppPersistance.user.getEmail());
         eTxtAddress.setText(AppPersistance.user.getAddress());
         eTxtPhone.setText(AppPersistance.user.getPhone());
-        // Mostrar la imagen almacenada (convertir byte[] a Bitmap)
+
+        // Muestra la imagen almacenada
         if (AppPersistance.user.getImage() != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(AppPersistance.user.getImage(), 0, AppPersistance.user.getImage().length);
             imgPhoto.setImageBitmap(bitmap);
@@ -122,9 +120,7 @@ public class EditUserActivity extends AppCompatActivity {
             imgPhoto.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
         }
 
-
-
-        // Configura el botón para seleccionar imagen
+        //Configuración del botón para seleccionar imagen
         btnPhoto.setOnClickListener(v -> {
             String[] opciones = {"Cámara", "Galería", "URL Externa"};
             new AlertDialog.Builder(EditUserActivity.this)
@@ -140,8 +136,20 @@ public class EditUserActivity extends AppCompatActivity {
                                 }
                                 break;
                             case 1: // Galería
-                                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                startActivityForResult(galleryIntent, REQUEST_IMAGE_GALLERY);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+                                    if (ContextCompat.checkSelfPermission(EditUserActivity.this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(EditUserActivity.this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_IMAGE_GALLERY);
+                                    } else {
+                                        openGallery();
+                                    }
+                                } else { // Android 12 o inferior
+                                    if (ContextCompat.checkSelfPermission(EditUserActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(EditUserActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_IMAGE_GALLERY);
+                                    } else {
+                                        openGallery();
+                                    }
+                                }
+
                                 break;
                             case 2: // URL Externa
                                 showUrlInputDialog();
@@ -151,7 +159,9 @@ public class EditUserActivity extends AppCompatActivity {
                     .show();
         });
 
+        //Configuración del botón para seleccionar una dirección
         btnAddress.setOnClickListener(v -> {
+            //Comprueba los permisos de ubicación
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
             } else {
@@ -161,42 +171,42 @@ public class EditUserActivity extends AppCompatActivity {
 
         ccp.registerCarrierNumberEditText(eTxtPhone);
 
+        //Configuración del botón de guardar cambios
         btnSave.setOnClickListener(v -> {
+            //Obtiene los valores de los distintos campos
             String newName = eTxtName.getText().toString().trim();
             String newEmail = eTxtEmail.getText().toString().trim();
             String newPhone = eTxtPhone.getText().toString().replaceAll("[^\\d]", "");
             String newAddress = eTxtAddress.getText().toString().trim();
 
+            //Comprueba la validez del telefono
             if (!newPhone.matches("^\\d{9,15}$")) {
                 Toast.makeText(this, "El número debe tener entre 9 y 15 dígitos.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Actualizar el objeto usuario en AppPersistance
+            // Actualiza el objeto usuario actual
             AppPersistance.user.setName(newName);
             AppPersistance.user.setEmail(newEmail);
             AppPersistance.user.setPhone(newPhone);
             AppPersistance.user.setAddress(newAddress);
 
-            // Actualizar la imagen: convertir el contenido de imgPhoto a byte[]
+            // Guarda imagen actualizada en AppPersistance
             imgPhoto.buildDrawingCache();
             Bitmap bitmap = imgPhoto.getDrawingCache();
             if (bitmap != null) {
                 AppPersistance.user.setImage(convertBitmapToByteArray(bitmap));
             }
 
-            // Actualizar usuario en la base de datos
+            // Actualiza el usuario en la base de datos
             DBManager.updateUser(EditUserActivity.this);
-
-
         });
-
-
-
     }
+
+    //Convierte un Bitmap en un array de bytes para guardarlo en la base de datos
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        // Ajusta el formato y la calidad según necesites (PNG, 100% calidad)
+        // Comprime la imagen en formato PNG con calidad 100%
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
@@ -211,6 +221,7 @@ public class EditUserActivity extends AppCompatActivity {
                 .setPositiveButton("OK", (dialog, which) -> {
                     String url = input.getText().toString().trim();
                     if (!url.isEmpty()) {
+                        //Descarga la imagen en un hilo secundario para evitar bloquear la interface
                         new Thread(() -> {
                             Bitmap bitmap = downloadImage(url);
                             runOnUiThread(() -> {
@@ -227,7 +238,7 @@ public class EditUserActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Método para descargar una imagen desde una URL
+    // Descarga una imagen desde una URL y la devuelve como Bitmap
     private Bitmap downloadImage(String urlString) {
         Bitmap bitmap = null;
         try {
@@ -243,9 +254,16 @@ public class EditUserActivity extends AppCompatActivity {
         return bitmap;
     }
 
+    //Abre la actividad para seleccionar una dirección
     private void openAddressSelector() {
         Intent intent = new Intent(EditUserActivity.this, SelectAddressActivity.class);
         addressLauncher.launch(intent);
+    }
+
+    //Abre la galeria
+    private void openGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, REQUEST_IMAGE_GALLERY);
     }
 
 
@@ -261,18 +279,15 @@ public class EditUserActivity extends AppCompatActivity {
                 imgPhoto.setImageBitmap(imageBitmap);
             } else if (requestCode == REQUEST_IMAGE_GALLERY) {
                 // Selección de la galería
-
                 selectedImage = data.getData();
                 try {
-                    // Abrir el InputStream para obtener el bitmap
+                    //Cargar la imagen desde la galería
                     InputStream imageStream = getContentResolver().openInputStream(selectedImage);
                     Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
-                    imageStream.close();
 
-                    // Reabrir el InputStream para leer los metadatos EXIF
-                    InputStream exifStream = getContentResolver().openInputStream(selectedImage);
-                    androidx.exifinterface.media.ExifInterface exif = new androidx.exifinterface.media.ExifInterface(exifStream);
-                    exifStream.close();
+                    // Leer los metadatos EXIF para corregir la orientación de la imagen
+                    androidx.exifinterface.media.ExifInterface exif = new androidx.exifinterface.media.ExifInterface(imageStream );
+                    imageStream.close();
 
                     int orientation = exif.getAttributeInt(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
                             androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL);
@@ -285,6 +300,7 @@ public class EditUserActivity extends AppCompatActivity {
                         rotation = 270;
                     }
 
+                    //Si la imagen tiene rotación, la correge antes de mostrarla
                     if (rotation != 0) {
                         android.graphics.Matrix matrix = new android.graphics.Matrix();
                         matrix.postRotate(rotation);
@@ -313,8 +329,18 @@ public class EditUserActivity extends AppCompatActivity {
                 Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
             }
         }
+        if (requestCode == REQUEST_IMAGE_GALLERY) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso concedido, abre la galeria
+                openGallery();
+            } else {
+                Toast.makeText(this, "Permiso de galería denegado", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Permiso de ubicación concedido, abrir selector de direcciones
                 openAddressSelector();
             } else {
                 Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show();

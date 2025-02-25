@@ -1,6 +1,5 @@
 package edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Database.Local;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -24,7 +23,6 @@ import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.KeystoreManager.KeystoreManage
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Movies.Movie;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.AppPersistance;
 import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.Persistance.SessionManager;
-import edu.pmdm.victoria_delpinodepaz_IMDBAPPV2_0.SearchResultActivity;
 
 /*Clase DBManager que gestiona las operaciones de la base de datos relacionadas con los favoritos del usuario.
  Proporciona métodos para inicializar la base de datos, obtener favoritos, agregar y eliminar películas favoritas.*/
@@ -84,13 +82,8 @@ public class DBManager {
                     movie.getReleaseDate(),
                     movie.getPhoto()
             });
-
+            //Tambien guarda la pelicula en firestore
             FirestoreManager.addFavorite(movie,res->{
-                Toast.makeText(
-                        context,
-                        "Resultado addFavoriteFirebase: "+res,
-                        Toast.LENGTH_SHORT
-                ).show();
                 Log.d("FirebaseFav","Resultado addFavoriteFirebase: "+res);
             });
         } catch (Exception e) {
@@ -111,27 +104,21 @@ public class DBManager {
             // Notifica al usuario que la película ha sido eliminada
             Toast.makeText(context, "Película eliminada de favoritos", Toast.LENGTH_SHORT).show();
 
+            //También elimina la película de la base de datos
             FirestoreManager.removeFavorite(movieId, success -> {
-                if (success) {
-                    Toast.makeText(context, "Película eliminada de favoritos firestore", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "Error al eliminar película firestore", Toast.LENGTH_SHORT).show();
-                }
+                Log.d("FirebaseFav","Resultado removeFavoriteFirebase: "+success);
             });
-
 
         } catch (Exception e) {
             Log.e("Error", "Error al eliminar favorito", e);
             Toast.makeText(context, "Error al eliminar la película", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // Agrega un usuario a la tabla "users" de la base de datos
     public static void addUser(Context context, User user) {
-
-
         SQLiteDatabase db = dBhelper.getWritableDatabase();
-
         String SQL = "INSERT OR IGNORE INTO users (user_id, name, email, image, address, phone, last_login, last_logout) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
         try {
             db.execSQL(SQL, new Object[]{
                     user.getUser_id(),
@@ -144,12 +131,9 @@ public class DBManager {
                     ""
             });
 
-            Toast.makeText(context, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show();
             Log.d("Database_", "Usuario agregado correctamente");
-
         } catch (Exception e) {
             Log.e("Error", "Error al insertar usuario: " + e.getMessage(), e);
-            Toast.makeText(context, "Error al agregar usuario", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -158,14 +142,14 @@ public class DBManager {
         User user= AppPersistance.user;
         SQLiteDatabase db = dBhelper.getWritableDatabase();
         try {
-            // Encriptar teléfono y dirección
+            // Encripta teléfono y dirección
             String encryptedPhone = KeystoreManager.encrypt(user.getPhone());
             String encryptedAddress = KeystoreManager.encrypt(user.getAddress());
 
             String SQL = "UPDATE users SET name = ?, image = ?, phone = ?, address = ? WHERE user_id = ?";
             db.execSQL(SQL, new Object[]{
                     user.getName(),
-                    user.getImage(),  // Ahora image es un byte[] (BLOB)
+                    user.getImage(),
                     encryptedPhone,
                     encryptedAddress,
                     user.getUser_id()
@@ -284,6 +268,8 @@ public class DBManager {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+
+    // Método para actualizar la fecha de último login del usuario en la tabla "users"
     public static void updateUserLogin(Context context) {
 
         User user = AppPersistance.user;
@@ -298,6 +284,7 @@ public class DBManager {
         }
     }
 
+    // Método para actualizar la fecha de último logout del usuario en la tabla "users"
     public static void updateUserLogout(Context context) {
         if (AppPersistance.user == null) {
             Log.w("DBManager", "AppPersistance.user es null; se omite la actualización del logout.");
@@ -314,6 +301,4 @@ public class DBManager {
             Toast.makeText(context, "Error al actualizar login", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 }
