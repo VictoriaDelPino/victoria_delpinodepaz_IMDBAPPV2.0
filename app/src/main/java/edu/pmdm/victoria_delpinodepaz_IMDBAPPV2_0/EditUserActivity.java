@@ -184,7 +184,6 @@ public class EditUserActivity extends AppCompatActivity {
                 Toast.makeText(this, "El número debe tener entre 9 y 15 dígitos.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             // Actualiza el objeto usuario actual
             AppPersistance.user.setName(newName);
             AppPersistance.user.setEmail(newEmail);
@@ -197,7 +196,6 @@ public class EditUserActivity extends AppCompatActivity {
             if (bitmap != null) {
                 AppPersistance.user.setImage(convertBitmapToByteArray(bitmap));
             }
-
             // Actualiza el usuario en la base de datos
             DBManager.updateUser(EditUserActivity.this);
         });
