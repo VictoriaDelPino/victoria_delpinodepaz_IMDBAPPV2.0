@@ -95,6 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         EditText editTextEmail=findViewById(R.id.eTxtEmail);
+        EditText editTextPassword=findViewById(R.id.eTxtPassword);
 
         Button btnRegisterEmail=findViewById(R.id.btnRegisterEmail);
 
@@ -146,10 +147,35 @@ public class LoginActivity extends AppCompatActivity {
                     editTextEmail.setError("Correo electrónico inválido");
                     btnLoginEmail.setEnabled(false);
                     btnRegisterEmail.setEnabled(false);
+
                 } else {
                     editTextEmail.setError(null);
-                    btnLoginEmail.setEnabled(true);
-                    btnRegisterEmail.setEnabled(true);
+                    if(!editTextPassword.getText().toString().isEmpty()){
+                        btnLoginEmail.setEnabled(true);
+                        btnRegisterEmail.setEnabled(true);
+                    }
+                    editTextPassword.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            boolean vacio = s.toString().trim().isEmpty();
+
+                            if (vacio) {
+                                btnLoginEmail.setEnabled(false);
+                                btnRegisterEmail.setEnabled(false);
+                            } else {
+                                editTextPassword.setError(null);
+                                btnLoginEmail.setEnabled(true);
+                                btnRegisterEmail.setEnabled(true);
+                            }
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {}
+                    });
+
                 }
             }
 
